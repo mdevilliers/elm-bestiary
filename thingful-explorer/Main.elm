@@ -1,7 +1,3 @@
-import Html exposing (..)
-import Html.App as Html
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 
 import Http
 import Json.Decode exposing ((:=)) 
@@ -11,42 +7,36 @@ import JsonApi.Resources
 import JsonApi.Documents
 import Task exposing (..)
 
-{- 
+import Html exposing (Html, button, div, text)
+import Html.App as Html
+import Html.Events exposing (onClick)
 
-main =
-    Html.program 
-    {init = init
-    , view = view
-    , update = update
-    , subscriptions = subscriptions
+
+main = text "hello"
+
+type alias Model = 
+    {
+    s : String
     }
 
--- update
-type Msg
-  = NoOp
+type Msg = FetchSucceded String
+    | FetchFailed Http.Error
 
-init : (Thing, Cmd Msg)
+
+init : Model
 init =
-    (Thing "none" "none", getThingResource "xxx")
+    (Model "empty" )
 
-update : Msg -> Thing -> (Thing, Cmd Msg)
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    case msg of
-        NoOp ->
-            (model, Cmd.None)
+  case msg of
 
--- view
+    FetchSucceded newUrl ->
+      (model, Cmd.none)
 
-view : Thing -> Html Msg
-view model =
-    div[]
-     [ h2 [] [text model.title] ]
+    FetchFailed _ ->
+      (model, Cmd.none)
 
-subscriptions : Thing -> Sub Msg
-subscriptions model =
-  Sub.none
-
--}
 
 --   List Thing
 
