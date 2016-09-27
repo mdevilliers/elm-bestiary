@@ -20,7 +20,7 @@ main =
     }
 
 type alias Model =
-    { s : String
+    { results : Maybe Search.Resource
     }
 
 
@@ -32,7 +32,7 @@ type Msg =
 
 init : ( Model , Cmd Msg)
 init =
-    (Model "" , loadSearchResults)
+    (Model Nothing , loadSearchResults)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -44,8 +44,7 @@ update msg model =
             let 
                 _ = Debug.log "got it :" resource
             in
-            ( model, Cmd.none )
-
+            ( Model (Just resource), Cmd.none )
         FetchFail _ ->
             ( model, Cmd.none )
 
@@ -56,8 +55,50 @@ view model =
     div[]
     [
         button [onClick DoSearch] [text "Search"]
+        , (maybeResource model.results)
     ]
 
+maybeResource : Maybe Search.Resource -> Html Msg
+maybeResource resources =
+    case resources of
+        Just resource -> viewResource resource
+        Nothing -> text ""
+
+viewResource : Search.Resource -> Html Msg
+viewResource resource =
+    div[] [
+        addLinks resource.links
+        , mapThings resource.data
+    ]
+
+addLinks : Search.Links -> Html Msg
+addLinks links =
+    div[][ 
+    a [ href "#" ] [ text "previous" ]
+    , a [ href "#" ] [ text "next" ]
+    ]
+
+
+mapThings : List Search.Thing -> Html Msg
+mapThings things =
+    div [] <| List.map viewThing things
+
+viewThing : Search.Thing -> Html Msg
+viewThing thing = 
+    div[][
+        h2 [] [text thing.id]
+        , div[] [text thing.title]
+        , div[] [text thing.description]
+        , viewMaybe thing.longitude
+        , viewMaybe thing.latitude
+
+    ]
+
+viewMaybe : Maybe Float -> Html Msg
+viewMaybe x =
+    case x of
+        Just y -> div[] [text (toString y)]
+        Nothing -> text ""
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -67,7 +108,7 @@ loadSearchResults :  Cmd Msg
 loadSearchResults =
   let
     url =
-      "https://api.thingful.net/things?geobound-maxlat=51.52909&geobound-maxlong=-0.064632&geobound-minlat=51.511104&geobound-minlong=-0.093544&limit=2&sort=score"
+      "https://api.thingful.net/things?q=bikes&limit=20&sort=score"
   in
     Task.perform FetchFail FetchSucceed (Http.get Search.resourceDecoder url)
 
