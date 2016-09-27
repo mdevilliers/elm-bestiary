@@ -2,7 +2,7 @@ module Search exposing (..)
 
 import Json.Decode exposing ((:=))
 import Json.Encode
-
+import Dict
 
 type alias Resource =
     { links : Links
@@ -11,13 +11,12 @@ type alias Resource =
 
 
 type alias Links =
-    List ( String, String )
-
+    Dict.Dict String String
 
 type alias Thing =
     { id : String
     , title : String
-    , description : String
+    , description : Maybe String
     , longitude : Maybe Float
     , latitude : Maybe Float
     }
@@ -36,7 +35,7 @@ decodeResource payload =
 resourceDecoder : Json.Decode.Decoder Resource
 resourceDecoder =
     Json.Decode.object2 Resource
-        ("links" := Json.Decode.keyValuePairs Json.Decode.string)
+        ("links" := Json.Decode.dict Json.Decode.string)
         ("data" := Json.Decode.list thingDecoder)
 
 
@@ -45,6 +44,6 @@ thingDecoder =
     Json.Decode.object5 Thing
         ("id" := Json.Decode.string)
         (Json.Decode.at [ "attributes", "title" ] Json.Decode.string)
-        (Json.Decode.at [ "attributes", "description" ] Json.Decode.string)
+        (Json.Decode.maybe (Json.Decode.at [ "attributes", "description" ] Json.Decode.string))
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "longitude" ] Json.Decode.float))
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "latitude" ] Json.Decode.float))

@@ -6,10 +6,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Task
+import Dict
 
 import Search
-
-
 
 main = 
     Html.program
@@ -26,36 +25,43 @@ type alias Model =
 
 type Msg = 
     DoSearch
+    | Navigate String
     | FetchSucceed Search.Resource
     | FetchFail Http.Error
 
 
 init : ( Model , Cmd Msg)
 init =
-    (Model Nothing , loadSearchResults)
+    (Model Nothing , loadSearchResults "https://api.thingful.net/things?geo-lat=51.52909&geo-long=-0.064632&geo-radius=25000&limit=20&sort=distance")
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Navigate url ->
+            (model, loadSearchResults url)
         DoSearch ->
-            (model, loadSearchResults)
+            (model, Cmd.none)
         FetchSucceed resource ->
-            let 
-                _ = Debug.log "got it :" resource
-            in
             ( Model (Just resource), Cmd.none )
-        FetchFail _ ->
+        FetchFail error ->
+            let 
+                _ = Debug.log "error :" error
+            in
             ( model, Cmd.none )
 
 
 
 view : Model -> Html Msg
 view model =
+    let 
+        _ = Debug.log "model " 
+    in
     div[]
     [
-        button [onClick DoSearch] [text "Search"]
-        , (maybeResource model.results)
+   --     button [onClick DoSearch] [text "Search"]
+    --    ,
+          (maybeResource model.results)
     ]
 
 maybeResource : Maybe Search.Resource -> Html Msg
@@ -67,17 +73,29 @@ maybeResource resources =
 viewResource : Search.Resource -> Html Msg
 viewResource resource =
     div[] [
-        addLinks resource.links
+        addPreviousLink resource.links
+        , addNextLink resource.links
         , mapThings resource.data
     ]
 
-addLinks : Search.Links -> Html Msg
-addLinks links =
-    div[][ 
-    a [ href "#" ] [ text "previous" ]
-    , a [ href "#" ] [ text "next" ]
-    ]
+-- yuck
+addNextLink : Search.Links -> Html Msg
+addNextLink links =
+    case Dict.get "next" links of
+        Just v -> addLink "next" v
+        Nothing -> text ""
 
+addPreviousLink : Search.Links -> Html Msg
+addPreviousLink links =
+    case Dict.get "prev" links of
+        Just v -> addLink "prev" v
+        Nothing -> text ""
+
+addLink : String ->  String -> Html Msg
+addLink title url =
+    div[][
+    a [href "#", onClick (Navigate url)] [text title]
+    ]
 
 mapThings : List Search.Thing -> Html Msg
 mapThings things =
@@ -88,13 +106,13 @@ viewThing thing =
     div[][
         h2 [] [text thing.id]
         , div[] [text thing.title]
-        , div[] [text thing.description]
+        , viewMaybe thing.description
         , viewMaybe thing.longitude
         , viewMaybe thing.latitude
 
     ]
 
-viewMaybe : Maybe Float -> Html Msg
+viewMaybe : Maybe a -> Html Msg
 viewMaybe x =
     case x of
         Just y -> div[] [text (toString y)]
@@ -104,11 +122,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.none
 
-loadSearchResults :  Cmd Msg
-loadSearchResults =
-  let
-    url =
-      "https://api.thingful.net/things?q=bikes&limit=20&sort=score"
-  in
+loadSearchResults : String -> Cmd Msg
+loadSearchResults url  =
     Task.perform FetchFail FetchSucceed (Http.get Search.resourceDecoder url)
-
