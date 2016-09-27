@@ -19,6 +19,8 @@ type alias Thing =
     , description : Maybe String
     , longitude : Maybe Float
     , latitude : Maybe Float
+    , score : Maybe Float
+    , distance : Maybe Float
     }
 
 
@@ -41,9 +43,11 @@ resourceDecoder =
 
 thingDecoder : Json.Decode.Decoder Thing
 thingDecoder =
-    Json.Decode.object5 Thing
+    Json.Decode.object7 Thing
         ("id" := Json.Decode.string)
         (Json.Decode.at [ "attributes", "title" ] Json.Decode.string)
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "description" ] Json.Decode.string))
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "longitude" ] Json.Decode.float))
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "latitude" ] Json.Decode.float))
+        (Json.Decode.maybe (Json.Decode.at [ "attributes", "score" ] Json.Decode.float))
+        (Json.Decode.maybe (Json.Decode.at [ "attributes", "distance" ] Json.Decode.float))

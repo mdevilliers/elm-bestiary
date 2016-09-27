@@ -106,16 +106,17 @@ viewThing thing =
     div[][
         h2 [] [text thing.id]
         , div[] [text thing.title]
-        , viewMaybe thing.description
-        , viewMaybe thing.longitude
-        , viewMaybe thing.latitude
-
+        , viewMaybe thing.description "Description :"
+        , viewMaybe thing.longitude "Longitude :"
+        , viewMaybe thing.latitude "Latitude :"
+        , viewMaybe thing.score "Score :"
+        , viewMaybe thing.distance "Distance :"
     ]
 
-viewMaybe : Maybe a -> Html Msg
-viewMaybe x =
-    case x of
-        Just y -> div[] [text (toString y)]
+viewMaybe : Maybe a -> String -> Html Msg
+viewMaybe property title =
+    case property of
+        Just y -> div[] [ b[] [ text title],  text (toString y)]
         Nothing -> text ""
 
 subscriptions : Model -> Sub Msg
