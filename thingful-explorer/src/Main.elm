@@ -106,11 +106,11 @@ viewThing thing =
     div[][
         h2 [] [text thing.id]
         , div[] [text thing.title]
-        , viewMaybe thing.description "Description :"
-        , viewMaybe thing.longitude "Longitude :"
-        , viewMaybe thing.latitude "Latitude :"
-        , viewMaybe thing.score "Score :"
-        , viewMaybe thing.distance "Distance :"
+        , viewMaybe thing.description "Description : "
+        , viewMaybe thing.longitude "Longitude : "
+        , viewMaybe thing.latitude "Latitude : "
+        , viewMaybe thing.score "Score : "
+        , viewMaybe thing.distance "Distance : "
     ]
 
 viewMaybe : Maybe a -> String -> Html Msg
