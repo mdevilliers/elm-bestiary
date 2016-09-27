@@ -21,8 +21,15 @@ type alias Thing =
     , latitude : Maybe Float
     , score : Maybe Float
     , distance : Maybe Float
+    , channels : List Channel
     }
 
+type alias Channel =
+    { id : String
+      , value : String
+      , recorded : String -- should be a date 
+      --, units : String
+    }
 
 decodeThing : String -> Result String Thing
 decodeThing payload =
@@ -43,7 +50,7 @@ resourceDecoder =
 
 thingDecoder : Json.Decode.Decoder Thing
 thingDecoder =
-    Json.Decode.object7 Thing
+    Json.Decode.object8 Thing
         ("id" := Json.Decode.string)
         (Json.Decode.at [ "attributes", "title" ] Json.Decode.string)
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "description" ] Json.Decode.string))
@@ -51,3 +58,11 @@ thingDecoder =
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "latitude" ] Json.Decode.float))
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "score" ] Json.Decode.float))
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "distance" ] Json.Decode.float))
+        (Json.Decode.at ["attributes", "channels" ] (Json.Decode.list channelDecoder))
+
+channelDecoder : Json.Decode.Decoder Channel
+channelDecoder =
+    Json.Decode.object3 Channel
+        ("id" := Json.Decode.string)
+        ("value" := Json.Decode.string)
+        ("recorded_at" := Json.Decode.string)

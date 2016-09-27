@@ -111,6 +111,8 @@ viewThing thing =
         , viewMaybe thing.latitude "Latitude : "
         , viewMaybe thing.score "Score : "
         , viewMaybe thing.distance "Distance : "
+        , div[] [ b[] [ text "Channels :" ] ]
+        , viewChannels thing.channels
     ]
 
 viewMaybe : Maybe a -> String -> Html Msg
@@ -118,6 +120,18 @@ viewMaybe property title =
     case property of
         Just y -> div[] [ b[] [ text title],  text (toString y)]
         Nothing -> text ""
+
+viewChannels : List Search.Channel -> Html Msg
+viewChannels channels =
+    div[] <| List.map viewChannel channels
+
+viewChannel : Search.Channel -> Html Msg
+viewChannel channel =
+    div[][
+       div[] [ b[] [ text "id : "  ], text channel.id]
+      , div[] [ b[] [ text "value : "  ], text channel.value]
+      , div[] [ b[] [ text "recorded : "  ], text channel.recorded]
+      ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
