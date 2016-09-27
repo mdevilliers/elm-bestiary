@@ -1,7 +1,8 @@
 
 build:
-	elm make Main.elm --output=main.js
+	elm make src/Main.elm --output=main.js
 
+format:
+	../bin/elm-format src
 
-
-
+.PHONY: format
