@@ -1,10 +1,35 @@
 <html>
-   <body> 
-   <div id="main"></div>
-   <script src="main.js"></script>
-   <script>
+    <head >
+       <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+       <script src='https://api.mapbox.com/mapbox-gl-js/v0.24.0/mapbox-gl.js'></script>
+       <link href='https://api.mapbox.com/mapbox-gl-js/v0.24.0/mapbox-gl.css' rel='stylesheet' />
+      <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+      </style>
+    </head >
+   <body > 
+   <div id="map" ></div>
+   <div id="main" ></div>
+   <script src="main.js" (></script>
+   <script >
      var node = document.getElementById('main');
      var app = Elm.Main.embed(node);
-   </script>
-    </body>
-</html>
+
+     mapboxgl.accessToken = '------';
+
+     app.ports.mapbox.subscribe ( function(message){
+        console.log(message)
+
+         var map = new mapboxgl.Map({
+                 container: 'map',
+                 center: [-74.50, 40],
+                 zoom: 13,
+                 style: 'mapbox://styles/mapbox/streets-v9',
+         });
+
+    });
+
+   </script >
+    </body >
+</html >

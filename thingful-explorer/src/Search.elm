@@ -4,6 +4,7 @@ import Json.Decode exposing ((:=))
 import Json.Encode
 import Dict
 
+
 type alias Resource =
     { links : Links
     , data : List Thing
@@ -12,6 +13,7 @@ type alias Resource =
 
 type alias Links =
     Dict.Dict String String
+
 
 type alias Thing =
     { id : String
@@ -24,12 +26,16 @@ type alias Thing =
     , channels : List Channel
     }
 
+
 type alias Channel =
     { id : String
-      , value : String
-      , recorded : String -- should be a date 
-      --, units : String
+    , value : String
+    , recorded :
+        String
+        -- should be a date
+        --, units : String
     }
+
 
 decodeThing : String -> Result String Thing
 decodeThing payload =
@@ -58,7 +64,8 @@ thingDecoder =
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "latitude" ] Json.Decode.float))
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "score" ] Json.Decode.float))
         (Json.Decode.maybe (Json.Decode.at [ "attributes", "distance" ] Json.Decode.float))
-        (Json.Decode.at ["attributes", "channels" ] (Json.Decode.list channelDecoder))
+        (Json.Decode.at [ "attributes", "channels" ] (Json.Decode.list channelDecoder))
+
 
 channelDecoder : Json.Decode.Decoder Channel
 channelDecoder =
