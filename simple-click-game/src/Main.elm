@@ -24,12 +24,10 @@ main =
 
 type alias Model =
     {
-       board : Board
+       size : Int
+       ,moves : Int
+       ,board : List Cell
     }
-
-type alias Board = List Row
-
-type alias Row = List Cell
 
 type alias Cell =
     {
@@ -41,11 +39,12 @@ type alias Cell =
 initialModel : Model
 initialModel =
     { 
-        -- 3 * 3
-        board = [ 
-             [Cell False 0 0, Cell False 0 1, Cell False 0 2 ],
-             [Cell False 1 0, Cell True 1 1, Cell False 1 2 ],
-             [Cell False 2 0, Cell False 2 1, Cell False 2 2 ]
+        size = 3
+        ,moves = 0
+        ,board = [ 
+             Cell False 0 0, Cell False 0 1, Cell False 0 2 
+            , Cell False 1 0, Cell True 1 1, Cell False 1 2 
+            , Cell False 2 0, Cell False 2 1, Cell False 2 2 
         ]
     }
 
@@ -71,9 +70,6 @@ update msg model =
             ( model, Cmd.none )
         Selected cell ->
             let 
-                _ = Debug.log "selected" (toString cell)
-                cell' = flipCell cell
-                _ = Debug.log "flipped" (toString cell')
                 (flippers, others) = findFlippers cell model.board
                 _ = Debug.log "flippers" (toString flippers)
                 _ = Debug.log "others" (toString others)
@@ -83,8 +79,7 @@ update msg model =
                 _ = Debug.log "new board" (toString board)
                 board_sorted = List.sortWith cellSorter board
                 _ = Debug.log "board sorted" (toString board_sorted)
-                board_split = chunksOfLeft 3 board_sorted
-                model' = Model board_split
+                model' = Model  model.size (model.moves + 1) board_sorted
             in
             (model', Cmd.none)
 
@@ -99,12 +94,9 @@ flipCell cell =
         False -> Cell True cell.x cell.y
         True -> Cell False cell.x cell.y
 
-findFlippers : Cell -> Board -> (List Cell, List Cell) 
+findFlippers : Cell -> List Cell -> (List Cell, List Cell) 
 findFlippers cell board =
-    let
-        all = List.concat board
-    in
-        List.partition (\a -> (willFlip cell a)) all
+        List.partition (\a -> (willFlip cell a)) board
 
 
 cellSorter : Cell -> Cell -> Order
@@ -158,19 +150,23 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
+    let
+        chunked = chunksOfLeft model.size model.board
+    in
     div []
         [ text "Hello, world!"
-        , drawGame model.board
+        , text ( toString model.moves)
+        , drawGame chunked
         ]
 
 
-drawGame : List Row -> Html Msg
+drawGame : List (List Cell) -> Html Msg
 drawGame rows =
-    div[] <|List.map drawRow rows
+    div[] <| List.map drawRow rows
 
 drawRow : List Cell -> Html Msg
 drawRow cells =
-    div[] <| List.map drawCell cells
+    div[] <| List.map drawCell cells 
 
 drawCell : Cell -> Html Msg
 drawCell cell =
