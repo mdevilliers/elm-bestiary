@@ -27,6 +27,7 @@ type alias Model =
        size : Int
        ,moves : Int
        ,board : List Cell
+       ,gameWon : Bool
     }
 
 type alias Cell =
@@ -46,6 +47,7 @@ initialModel =
             , Cell False 1 0, Cell True 1 1, Cell False 1 2 
             , Cell False 2 0, Cell False 2 1, Cell False 2 2 
         ]
+        ,gameWon = False
     }
 
 
@@ -79,10 +81,14 @@ update msg model =
                 _ = Debug.log "new board" (toString board)
                 board_sorted = List.sortWith cellSorter board
                 _ = Debug.log "board sorted" (toString board_sorted)
-                model' = Model  model.size (model.moves + 1) board_sorted
+                model' = Model model.size (model.moves + 1) board_sorted (hasWinner board_sorted)
             in
             (model', Cmd.none)
 
+
+hasWinner : List Cell -> Bool
+hasWinner cells =
+    List.all (\a -> a.selected) cells || List.all (\a -> a.selected == False) cells
 
 flipCells : List Cell -> List Cell
 flipCells cells =
@@ -98,10 +104,9 @@ findFlippers : Cell -> List Cell -> (List Cell, List Cell)
 findFlippers cell board =
         List.partition (\a -> (willFlip cell a)) board
 
-
 cellSorter : Cell -> Cell -> Order
 cellSorter a b =
-    let 
+    let
         akey = (toString a.x) ++ (toString a.y)
         bkey = (toString b.x) ++ (toString b.y)
     in
@@ -156,6 +161,7 @@ view model =
     div []
         [ text "Hello, world!"
         , text ( toString model.moves)
+        , text (toString model.gameWon)
         , drawGame chunked
         ]
 
