@@ -4,7 +4,9 @@ import Html exposing (..)
 import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Random exposing(bool, generate)
 
+import List.Extra exposing (andThen)
 
 main : Program Never
 main =
@@ -76,27 +78,24 @@ update msg model =
                     ( model, Cmd.none )
 
         NewGame ->
-            ( Model (Just (newBoard 3)), Cmd.none )
+            ( Model (Just (newBoard 5)), Cmd.none )
 
 
 newBoard : Int -> Game
 newBoard size =
+    let
+        all = [0 ..  (size - 1)] `andThen` \x -> [0 ..  (size - 1)] `andThen` \y -> [(x,y)]
+        cells = List.map (\(x,y) -> Cell True x y) all
+    in
     { size = size
     , moves = 0
-    , board =
-        [ Cell False 0 0
-        , Cell False 0 1
-        , Cell False 0 2
-        , Cell False 1 0
-        , Cell True 1 1
-        , Cell False 1 2
-        , Cell False 2 0
-        , Cell False 2 1
-        , Cell False 2 2
-        ]
+    , board = cells
     , gameWon = False
     }
 
+boolx : Random.Generator Bool
+boolx =
+  Random.map ((==) 1) (Random.int 0 1)
 
 applySelected : Game -> Cell -> Game
 applySelected game selected =
