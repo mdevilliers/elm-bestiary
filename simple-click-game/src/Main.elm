@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Random exposing(bool, generate)
+import Random
 
 import List.Extra exposing (andThen)
 
@@ -56,7 +56,6 @@ init =
 
 -- UPDATE
 
-
 type Msg
     = NoOp
     | Selected Cell
@@ -85,7 +84,10 @@ newBoard : Int -> Game
 newBoard size =
     let
         all = [0 ..  (size - 1)] `andThen` \x -> [0 ..  (size - 1)] `andThen` \y -> [(x,y)]
-        cells = List.map (\(x,y) -> Cell True x y) all
+        seed = Random.initialSeed 0 -- TODO : need to set seed 
+        (values, _) = Random.step (boolList (size * size)) seed
+        zipped = zip all values
+        cells = List.map (\((x,y), b) -> Cell b  x y) zipped
     in
     { size = size
     , moves = 0
@@ -93,9 +95,18 @@ newBoard size =
     , gameWon = False
     }
 
-boolx : Random.Generator Bool
-boolx =
-  Random.map ((==) 1) (Random.int 0 1)
+boolList : Int -> Random.Generator (List Bool)
+boolList n =
+    Random.list n Random.bool
+
+zip : List a -> List b -> List (a,b)
+zip xs ys =
+  case (xs, ys) of
+    ( x :: xs', y :: ys' ) ->
+        (x,y) :: zip xs' ys'
+
+    (_, _) ->
+        []
 
 applySelected : Game -> Cell -> Game
 applySelected game selected =
