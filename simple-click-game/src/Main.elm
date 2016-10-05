@@ -72,19 +72,25 @@ update msg model =
             ( model, Cmd.none )
         Selected cell ->
             let 
-                (flippers, others) = findFlippers cell model.board
-                _ = Debug.log "flippers" (toString flippers)
-                _ = Debug.log "others" (toString others)
-                flipped = flipCells flippers
-                _ = Debug.log "all flipped" ( toString flipped)
-                board = List.append flipped others
-                _ = Debug.log "new board" (toString board)
-                board_sorted = List.sortWith cellSorter board
-                _ = Debug.log "board sorted" (toString board_sorted)
-                model' = Model model.size (model.moves + 1) board_sorted (hasWinner board_sorted)
+                board = applySelected model.board cell
             in
-            (model', Cmd.none)
+            ( {model | board = board, gameWon = (hasWinner board)} , Cmd.none)
 
+
+applySelected : List Cell -> Cell -> List Cell
+applySelected board selected =
+    let
+        (flippers, others) = findFlippers selected board
+        _ = Debug.log "flippers" (toString flippers)
+        _ = Debug.log "others" (toString others)
+        flipped = flipCells flippers
+        _ = Debug.log "all flipped" ( toString flipped)
+        board = List.append flipped others
+        _ = Debug.log "new board" (toString board)
+        board_sorted = List.sortWith cellSorter board
+        _ = Debug.log "board sorted" (toString board_sorted)
+    in
+        board_sorted
 
 hasWinner : List Cell -> Bool
 hasWinner cells =
