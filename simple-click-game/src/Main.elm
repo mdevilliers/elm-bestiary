@@ -23,7 +23,7 @@ main =
 
 type alias Model =
     {
-       currentGame : Game
+       currentGame : Maybe Game
     }
 
 
@@ -45,17 +45,8 @@ type alias Cell =
 initialModel : Model
 initialModel =
     {
-    currentGame =  { 
-        size = 3
-        ,moves = 0
-        ,board = [ 
-             Cell False 0 0, Cell False 0 1, Cell False 0 2 
-            , Cell False 1 0, Cell True 1 1, Cell False 1 2 
-            , Cell False 2 0, Cell False 2 1, Cell False 2 2 
-        ]
-        ,gameWon = False
-    }}
-
+        currentGame =Nothing
+    }
 
 init : ( Model, Cmd Msg )
 init =
@@ -69,6 +60,7 @@ init =
 type Msg
     = NoOp
     | Selected Cell
+    | NewGame
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -77,7 +69,25 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
         Selected cell ->
-            ( { model | currentGame = (applySelected model.currentGame cell )} , Cmd.none)
+            case model.currentGame of
+                Just game ->( { model | currentGame = Just (applySelected game cell )} , Cmd.none)
+                Nothing -> (model, Cmd.none)
+        NewGame -> 
+            ( Model (Just (newBoard 3)), Cmd.none)
+
+
+newBoard : Int -> Game 
+newBoard size =
+    { 
+        size = size
+        ,moves = 0
+        ,board = [ 
+             Cell False 0 0, Cell False 0 1, Cell False 0 2 
+            , Cell False 1 0, Cell True 1 1, Cell False 1 2 
+            , Cell False 2 0, Cell False 2 1, Cell False 2 2 
+        ]
+        ,gameWon = False
+    }
 
 
 applySelected : Game -> Cell -> Game
@@ -93,7 +103,7 @@ applySelected game selected =
         board_sorted = List.sortWith cellSorter board
         --_ = Debug.log "board sorted" (toString board_sorted)
     in
-        { game | board = board_sorted}
+        { game | board = board_sorted, moves = (game.moves + 1), gameWon = hasWinner (board_sorted) }
 
 hasWinner : List Cell -> Bool
 hasWinner cells =
@@ -164,16 +174,27 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
+    case model.currentGame of
+        Just game -> showRunningGame game
+        Nothing -> div[] 
+                    [ button [ onClick NewGame] [text "start game" ]
+                    ]
+
+
+showRunningGame : Game -> Html Msg
+showRunningGame game =
     let
-        chunked = chunksOfLeft model.currentGame.size model.currentGame.board
+        chunked = chunksOfLeft game.size game.board
     in
     div []
-        [ text "Hello, world!"
-        , text ( toString model.currentGame.moves)
-        , text (toString model.currentGame.gameWon)
+        [ text "game on!"
+        , text ( toString game.moves)
+        , text (toString game.gameWon)
         , drawGame chunked
         ]
 
+
+--decideScreen : Model -> Html Msg
 
 drawGame : List (List Cell) -> Html Msg
 drawGame rows =
