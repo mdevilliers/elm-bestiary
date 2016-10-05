@@ -21,8 +21,13 @@ main =
 
 -- MODEL
 
-
 type alias Model =
+    {
+       currentGame : Game
+    }
+
+
+type alias Game =
     {
        size : Int
        ,moves : Int
@@ -39,7 +44,8 @@ type alias Cell =
 
 initialModel : Model
 initialModel =
-    { 
+    {
+    currentGame =  { 
         size = 3
         ,moves = 0
         ,board = [ 
@@ -48,7 +54,7 @@ initialModel =
             , Cell False 2 0, Cell False 2 1, Cell False 2 2 
         ]
         ,gameWon = False
-    }
+    }}
 
 
 init : ( Model, Cmd Msg )
@@ -71,26 +77,23 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
         Selected cell ->
-            let 
-                board = applySelected model.board cell
-            in
-            ( {model | board = board, gameWon = (hasWinner board)} , Cmd.none)
+            ( { model | currentGame = (applySelected model.currentGame cell )} , Cmd.none)
 
 
-applySelected : List Cell -> Cell -> List Cell
-applySelected board selected =
+applySelected : Game -> Cell -> Game
+applySelected game selected =
     let
-        (flippers, others) = findFlippers selected board
-        _ = Debug.log "flippers" (toString flippers)
-        _ = Debug.log "others" (toString others)
+        (flippers, others) = findFlippers selected game.board
+        --_ = Debug.log "flippers" (toString flippers)
+        --_ = Debug.log "others" (toString others)
         flipped = flipCells flippers
-        _ = Debug.log "all flipped" ( toString flipped)
+        --_ = Debug.log "all flipped" ( toString flipped)
         board = List.append flipped others
-        _ = Debug.log "new board" (toString board)
+        --_ = Debug.log "new board" (toString board)
         board_sorted = List.sortWith cellSorter board
-        _ = Debug.log "board sorted" (toString board_sorted)
+        --_ = Debug.log "board sorted" (toString board_sorted)
     in
-        board_sorted
+        { game | board = board_sorted}
 
 hasWinner : List Cell -> Bool
 hasWinner cells =
@@ -162,12 +165,12 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
-        chunked = chunksOfLeft model.size model.board
+        chunked = chunksOfLeft model.currentGame.size model.currentGame.board
     in
     div []
         [ text "Hello, world!"
-        , text ( toString model.moves)
-        , text (toString model.gameWon)
+        , text ( toString model.currentGame.moves)
+        , text (toString model.currentGame.gameWon)
         , drawGame chunked
         ]
 
