@@ -5,8 +5,8 @@ import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Random
-
 import List.Extra exposing (andThen)
+
 
 main : Program Never
 main =
@@ -56,10 +56,12 @@ init =
 
 -- UPDATE
 
+
 type Msg
     = NoOp
     | Selected Cell
-    | NewGame
+    | NewGame Int
+    | Menu
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -76,37 +78,53 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
-        NewGame ->
-            ( Model (Just (newBoard 5)), Cmd.none )
+        NewGame n ->
+            ( Model (Just (newBoard n)), Cmd.none )
+
+        Menu ->
+            ( Model Nothing, Cmd.none )
 
 
 newBoard : Int -> Game
 newBoard size =
     let
-        all = [0 ..  (size - 1)] `andThen` \x -> [0 ..  (size - 1)] `andThen` \y -> [(x,y)]
-        seed = Random.initialSeed 0 -- TODO : need to set seed 
-        (values, _) = Random.step (boolList (size * size)) seed
-        zipped = zip all values
-        cells = List.map (\((x,y), b) -> Cell b  x y) zipped
+        all =
+            [0..(size - 1)] `andThen` \x -> [0..(size - 1)] `andThen` \y -> [ ( x, y ) ]
+
+        seed =
+            Random.initialSeed 0
+
+        -- TODO : need to set seed
+        ( values, _ ) =
+            Random.step (boolList (size * size)) seed
+
+        zipped =
+            zip all values
+
+        cells =
+            List.map (\( ( x, y ), b ) -> Cell b x y) zipped
     in
-    { size = size
-    , moves = 0
-    , board = cells
-    , gameWon = False
-    }
+        { size = size
+        , moves = 0
+        , board = cells
+        , gameWon = False
+        }
+
 
 boolList : Int -> Random.Generator (List Bool)
 boolList n =
     Random.list n Random.bool
 
-zip : List a -> List b -> List (a,b)
-zip xs ys =
-  case (xs, ys) of
-    ( x :: xs', y :: ys' ) ->
-        (x,y) :: zip xs' ys'
 
-    (_, _) ->
-        []
+zip : List a -> List b -> List ( a, b )
+zip xs ys =
+    case ( xs, ys ) of
+        ( x :: xs', y :: ys' ) ->
+            ( x, y ) :: zip xs' ys'
+
+        ( _, _ ) ->
+            []
+
 
 applySelected : Game -> Cell -> Game
 applySelected game selected =
@@ -114,20 +132,14 @@ applySelected game selected =
         ( flippers, others ) =
             findFlippers selected game.board
 
-        --_ = Debug.log "flippers" (toString flippers)
-        --_ = Debug.log "others" (toString others)
         flipped =
             flipCells flippers
 
-        --_ = Debug.log "all flipped" ( toString flipped)
         board =
             List.append flipped others
 
-        --_ = Debug.log "new board" (toString board)
         board_sorted =
             List.sortWith cellSorter board
-
-        --_ = Debug.log "board sorted" (toString board_sorted)
     in
         { game | board = board_sorted, moves = (game.moves + 1), gameWon = hasWinner (board_sorted) }
 
@@ -237,7 +249,9 @@ view model =
 
         Nothing ->
             div []
-                [ button [ onClick NewGame ] [ text "start game" ]
+                [ button [ onClick (NewGame 3) ] [ text "3" ]
+                , button [ onClick (NewGame 5) ] [ text "5" ]
+                , button [ onClick (NewGame 10) ] [ text "10" ]
                 ]
 
 
@@ -273,14 +287,27 @@ drawCell : Cell -> Html Msg
 drawCell cell =
     case cell.selected of
         True ->
-            span [ selectedStyle, onClick (Selected cell) ] [ text (toString cell) ]
+            span [ onStyle, onClick (Selected cell) ] [ text "-" ]
 
         False ->
-            span [ onClick (Selected cell) ] [ text (toString cell) ]
+            span [ offStyle, onClick (Selected cell) ] [ text "-" ]
 
 
-selectedStyle : Attribute msg
-selectedStyle =
+onStyle : Attribute msg
+onStyle =
     style
         [ ( "backgroundColor", "red" )
+        , ( "display", "inline-block" )
+        , ( "width", "100px" )
+        , ( "height", "100px" )
+        ]
+
+
+offStyle : Attribute msg
+offStyle =
+    style
+        [ ( "backgroundColor", "green" )
+        , ( "display", "inline-block" )
+        , ( "width", "100px" )
+        , ( "height", "100px" )
         ]
