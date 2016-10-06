@@ -148,10 +148,10 @@ flipCell : Cell -> Cell
 flipCell cell =
     case cell.selected of
         False ->
-            Cell True cell.x cell.y
+            { cell | selected = True }
 
         True ->
-            Cell False cell.x cell.y
+            { cell | selected = False }
 
 
 findFlippers : Cell -> List Cell -> ( List Cell, List Cell )
