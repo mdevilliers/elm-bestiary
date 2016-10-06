@@ -5,7 +5,7 @@ import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Random
-import List.Extra exposing (andThen)
+import List.Extra exposing (andThen, zip, groupsOf)
 
 
 main : Program Never
@@ -61,7 +61,7 @@ type Msg
     = NoOp
     | Selected Cell
     | NewGame Int
-    | Menu
+    | ShowMenu
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -81,8 +81,8 @@ update msg model =
         NewGame n ->
             ( Model (Just (newBoard n)), Cmd.none )
 
-        Menu ->
-            ( Model Nothing, Cmd.none )
+        ShowMenu ->
+            ( initialModel, Cmd.none )
 
 
 newBoard : Int -> Game
@@ -91,10 +91,10 @@ newBoard size =
         all =
             [0..(size - 1)] `andThen` \x -> [0..(size - 1)] `andThen` \y -> [ ( x, y ) ]
 
+        -- TODO : need to set seed
         seed =
             Random.initialSeed 0
 
-        -- TODO : need to set seed
         ( values, _ ) =
             Random.step (boolList (size * size)) seed
 
@@ -114,16 +114,6 @@ newBoard size =
 boolList : Int -> Random.Generator (List Bool)
 boolList n =
     Random.list n Random.bool
-
-
-zip : List a -> List b -> List ( a, b )
-zip xs ys =
-    case ( xs, ys ) of
-        ( x :: xs', y :: ys' ) ->
-            ( x, y ) :: zip xs' ys'
-
-        ( _, _ ) ->
-            []
 
 
 applySelected : Game -> Cell -> Game
@@ -216,18 +206,6 @@ willFlip cell potential =
             False
 
 
-chunksOfLeft : Int -> List a -> List (List a)
-chunksOfLeft k xs =
-    let
-        len =
-            List.length xs
-    in
-        if len > k then
-            List.take k xs :: chunksOfLeft k (List.drop k xs)
-        else
-            [ xs ]
-
-
 
 -- SUBSCRIPTIONS
 
@@ -259,18 +237,15 @@ showRunningGame : Game -> Html Msg
 showRunningGame game =
     let
         chunked =
-            chunksOfLeft game.size game.board
+            groupsOf game.size game.board
     in
         div []
             [ text "game on!"
             , text (toString game.moves)
             , text (toString game.gameWon)
             , drawGame chunked
+            , button [ onClick ShowMenu ] [ text "menu" ]
             ]
-
-
-
---decideScreen : Model -> Html Msg
 
 
 drawGame : List (List Cell) -> Html Msg
@@ -287,19 +262,25 @@ drawCell : Cell -> Html Msg
 drawCell cell =
     case cell.selected of
         True ->
-            span [ onStyle, onClick (Selected cell) ] [ text "-" ]
+            span [ blockStyle, onStyle, onClick (Selected cell) ] [ text "-" ]
 
         False ->
-            span [ offStyle, onClick (Selected cell) ] [ text "-" ]
+            span [ blockStyle, offStyle, onClick (Selected cell) ] [ text "-" ]
+
+
+blockStyle : Attribute msg
+blockStyle =
+    style
+        [ ( "display", "inline-block" )
+        , ( "width", "100px" )
+        , ( "height", "100px" )
+        ]
 
 
 onStyle : Attribute msg
 onStyle =
     style
         [ ( "backgroundColor", "red" )
-        , ( "display", "inline-block" )
-        , ( "width", "100px" )
-        , ( "height", "100px" )
         ]
 
 
@@ -307,7 +288,4 @@ offStyle : Attribute msg
 offStyle =
     style
         [ ( "backgroundColor", "green" )
-        , ( "display", "inline-block" )
-        , ( "width", "100px" )
-        , ( "height", "100px" )
         ]
