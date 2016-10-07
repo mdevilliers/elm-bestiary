@@ -24,7 +24,7 @@ main =
 
 type alias Model =
     { currentGame : Game
-      ,view : View
+    , view : View
     }
 
 
@@ -54,9 +54,12 @@ init : ( Model, Cmd Msg )
 init =
     ( initialModel, Cmd.none )
 
+
 type View
     = Menu
     | GameInPlay
+
+
 
 -- UPDATE
 
@@ -81,7 +84,7 @@ update msg model =
             ( Model (newBoard n) GameInPlay, Cmd.none )
 
         ShowMenu ->
-            ( {model | view = Menu } , Cmd.none )
+            ( { model | view = Menu }, Cmd.none )
 
 
 newBoard : Int -> Game
@@ -222,9 +225,11 @@ view : Model -> Html Msg
 view model =
     case model.view of
         Menu ->
-                showMenu
+            showMenu
+
         GameInPlay ->
-                showRunningGame model.currentGame
+            showRunningGame model.currentGame
+
 
 showMenu : Html Msg
 showMenu =
@@ -232,7 +237,8 @@ showMenu =
         [ button [ onClick (NewGame 3) ] [ text "3" ]
         , button [ onClick (NewGame 5) ] [ text "5" ]
         , button [ onClick (NewGame 10) ] [ text "10" ]
-    ]
+        ]
+
 
 showRunningGame : Game -> Html Msg
 showRunningGame game =
@@ -247,16 +253,20 @@ showRunningGame game =
             , button [ onClick ShowMenu ] [ text "menu" ]
             ]
 
-status : Game ->Html Msg
+
+status : Game -> Html Msg
 status game =
-    case game.gameWon  of
-        False -> text "game on"
-        True -> text "game over - please play again... "
+    case game.gameWon of
+        False ->
+            text "game on"
+
+        True ->
+            text "game over - please play again... "
 
 
 drawGame : Game -> List (List Cell) -> Html Msg
 drawGame game rows =
-    div [] <| List.map (\r -> drawRow game r ) rows
+    div [] <| List.map (\r -> drawRow game r) rows
 
 
 drawRow : Game -> List Cell -> Html Msg
@@ -270,15 +280,19 @@ drawCell game cell =
         True ->
             case game.gameWon of
                 False ->
-                     span [ blockStyle, onStyle ,  onClick (Selected cell) ] [ text "-" ]
+                    span [ blockStyle, onStyle, onClick (Selected cell) ] [ text "-" ]
+
                 True ->
                     span [ blockStyle, onStyle ] [ text "-" ]
+
         False ->
             case game.gameWon of
                 False ->
-                   span [ blockStyle, offStyle ,  onClick (Selected cell) ] [ text "-" ]
+                    span [ blockStyle, offStyle, onClick (Selected cell) ] [ text "-" ]
+
                 True ->
                     span [ blockStyle, offStyle ] [ text "-" ]
+
 
 blockStyle : Attribute msg
 blockStyle =
