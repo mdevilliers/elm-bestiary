@@ -23,7 +23,8 @@ main =
 
 
 type alias Model =
-    { currentGame : Maybe Game
+    { currentGame : Game
+      ,view : View
     }
 
 
@@ -44,7 +45,8 @@ type alias Cell =
 
 initialModel : Model
 initialModel =
-    { currentGame = Nothing
+    { currentGame = Game 0 0 [] False
+    , view = Menu
     }
 
 
@@ -52,7 +54,10 @@ init : ( Model, Cmd Msg )
 init =
     ( initialModel, Cmd.none )
 
-
+type View
+    = Menu
+    | GameInPlay
+    | GameOver
 
 -- UPDATE
 
@@ -71,18 +76,13 @@ update msg model =
             ( model, Cmd.none )
 
         Selected cell ->
-            case model.currentGame of
-                Just game ->
-                    ( { model | currentGame = Just (applySelected game cell) }, Cmd.none )
-
-                Nothing ->
-                    ( model, Cmd.none )
+                    ( { model | currentGame = applySelected model.currentGame cell }, Cmd.none )
 
         NewGame n ->
-            ( Model (Just (newBoard n)), Cmd.none )
+            ( Model (newBoard n) GameInPlay, Cmd.none )
 
         ShowMenu ->
-            ( initialModel, Cmd.none )
+            ( {model | view = Menu } , Cmd.none )
 
 
 newBoard : Int -> Game
@@ -221,17 +221,21 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    case model.currentGame of
-        Just game ->
-            showRunningGame game
+    case model.view of
+        Menu ->
+                showMenu
+        GameInPlay ->
+                showRunningGame model.currentGame
+        GameOver ->
+                div[] [ text "game over" ] 
 
-        Nothing ->
-            div []
-                [ button [ onClick (NewGame 3) ] [ text "3" ]
-                , button [ onClick (NewGame 5) ] [ text "5" ]
-                , button [ onClick (NewGame 10) ] [ text "10" ]
-                ]
-
+showMenu : Html Msg
+showMenu =
+    div []
+        [ button [ onClick (NewGame 3) ] [ text "3" ]
+        , button [ onClick (NewGame 5) ] [ text "5" ]
+        , button [ onClick (NewGame 10) ] [ text "10" ]
+    ]
 
 showRunningGame : Game -> Html Msg
 showRunningGame game =
