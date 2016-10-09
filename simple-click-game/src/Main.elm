@@ -276,22 +276,18 @@ drawRow game cells =
 
 drawCell : Game -> Cell -> Html Msg
 drawCell game cell =
-    case cell.selected of
-        True ->
-            case game.gameWon of
-                False ->
-                    span [ blockStyle, onStyle, onClick (Selected cell) ] [ text "-" ]
+    case ( cell.selected, game.gameWon ) of
+        ( True, False ) ->
+            span [ blockStyle, onStyle, onClick (Selected cell) ] [ text "-" ]
 
-                True ->
-                    span [ blockStyle, onStyle ] [ text "-" ]
+        ( True, True ) ->
+            span [ blockStyle, onStyle ] [ text "-" ]
 
-        False ->
-            case game.gameWon of
-                False ->
-                    span [ blockStyle, offStyle, onClick (Selected cell) ] [ text "-" ]
+        ( False, False ) ->
+            span [ blockStyle, offStyle, onClick (Selected cell) ] [ text "-" ]
 
-                True ->
-                    span [ blockStyle, offStyle ] [ text "-" ]
+        ( False, True ) ->
+            span [ blockStyle, offStyle ] [ text "-" ]
 
 
 blockStyle : Attribute msg
