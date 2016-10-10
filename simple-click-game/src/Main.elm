@@ -31,9 +31,14 @@ type alias Model =
 type alias Game =
     { size : Int
     , moves : Int
-    , board : List Cell
+    , board : Board
     , gameWon : Bool
+    , previousStates : List Board
     }
+
+
+type alias Board =
+    List Cell
 
 
 type alias Cell =
@@ -45,7 +50,7 @@ type alias Cell =
 
 initialModel : Model
 initialModel =
-    { currentGame = Game 0 0 [] False
+    { currentGame = Game 0 0 [] False []
     , view = Menu
     }
 
@@ -110,6 +115,7 @@ newBoard size =
         , moves = 0
         , board = cells
         , gameWon = False
+        , previousStates = []
         }
 
 
@@ -121,6 +127,9 @@ boolList n =
 applySelected : Game -> Cell -> Game
 applySelected game selected =
     let
+        history =
+            game.board :: game.previousStates
+
         ( flippers, others ) =
             findFlippers selected game.board
 
@@ -133,7 +142,7 @@ applySelected game selected =
         board_sorted =
             List.sortWith cellSorter board
     in
-        { game | board = board_sorted, moves = (game.moves + 1), gameWon = hasWinner (board_sorted) }
+        { game | board = board_sorted, moves = (game.moves + 1), gameWon = hasWinner (board_sorted), previousStates = history }
 
 
 hasWinner : List Cell -> Bool
@@ -249,8 +258,9 @@ showRunningGame game =
         div []
             [ status game
             , text (toString game.moves)
-            , drawGame game chunked
+            , drawGame chunked (game.gameWon == False)
             , button [ onClick ShowMenu ] [ text "menu" ]
+            , div [] <| List.map (\r -> div [ shrinkStyle ] [ drawGame (groupsOf game.size r) False ]) game.previousStates
             ]
 
 
@@ -264,30 +274,35 @@ status game =
             text "game over - please play again... "
 
 
-drawGame : Game -> List (List Cell) -> Html Msg
-drawGame game rows =
-    div [] <| List.map (\r -> drawRow game r) rows
+drawGame : List (List Cell) -> Bool -> Html Msg
+drawGame rows allowClick =
+    div [] <| List.map (\r -> drawRow r allowClick) rows
 
 
-drawRow : Game -> List Cell -> Html Msg
-drawRow game cells =
-    div [] <| List.map (\c -> drawCell game c) cells
+drawRow : List Cell -> Bool -> Html Msg
+drawRow cells allowClick =
+    div [] <| List.map (\c -> drawCell c allowClick) cells
 
 
-drawCell : Game -> Cell -> Html Msg
-drawCell game cell =
-    case ( cell.selected, game.gameWon ) of
-        ( True, False ) ->
+drawCell : Cell -> Bool -> Html Msg
+drawCell cell allowClick =
+    case ( cell.selected, allowClick ) of
+        ( True, True ) ->
             span [ blockStyle, onStyle, onClick (Selected cell) ] [ text "-" ]
 
-        ( True, True ) ->
+        ( True, False ) ->
             span [ blockStyle, onStyle ] [ text "-" ]
 
-        ( False, False ) ->
+        ( False, True ) ->
             span [ blockStyle, offStyle, onClick (Selected cell) ] [ text "-" ]
 
-        ( False, True ) ->
+        ( False, False ) ->
             span [ blockStyle, offStyle ] [ text "-" ]
+
+
+drawHistory : List Board -> Html Msg
+drawHistory boards =
+    div [] []
 
 
 blockStyle : Attribute msg
@@ -311,3 +326,8 @@ offStyle =
     style
         [ ( "backgroundColor", "green" )
         ]
+
+
+shrinkStyle : Attribute msg
+shrinkStyle =
+    style [ ( "transform", "scale(0.5)" ) ]
