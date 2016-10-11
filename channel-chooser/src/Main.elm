@@ -29,17 +29,19 @@ main =
 
 
 type alias Model =
-    {}
+    {
+        channels : List Channel
+    }
 
 
 initialModel : Model
 initialModel =
-    {}
+    { channels = [] }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Cmd.none )
+    ( initialModel, loadChannels )
 
 
 channelData : String
@@ -98,7 +100,7 @@ update msg model =
         LoadingFailed error ->
             (model, Cmd.none)
         LoadingSuccess metadata ->
-            (model, Cmd.none)
+            ( Model metadata.channels, Cmd.none)
 
 
 -- SUBSCRIPTIONS
@@ -116,9 +118,14 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text "Hello, world!"
-        , text (toString model)
+        [
+        text (toString model)
+        , div[] <| List.map drawChannel model.channels
         ]
+
+drawChannel : Channel -> Html Msg
+drawChannel channel = 
+    div[] [text channel.id, text ":",  text (toString channel.value) ]
 
 
 loadChannels : Cmd Msg
