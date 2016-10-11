@@ -10,8 +10,8 @@ import Json.Encode
 
 import Task
 
---import Html.Attributes exposing (..)
---import Html.Events exposing (onClick)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 
 
 main : Program Never
@@ -31,12 +31,13 @@ main =
 type alias Model =
     {
         channels : List Channel
+        ,entitlement : Entitlement
     }
 
 
 initialModel : Model
 initialModel =
-    { channels = [] }
+    { channels = [], entitlement = [] }
 
 
 init : ( Model, Cmd Msg )
@@ -70,7 +71,7 @@ channelData =
 }
 """
 
-type alias Channel = 
+type alias Channel =
     {
         id : String
         ,value : Int
@@ -79,9 +80,31 @@ type alias Channel =
     }
 
 type alias Metadata =
-    { 
-        channels : List Channel
+    {
+        channels : Channels
     }
+
+type alias Channels = 
+    List Channel
+
+type alias Visible = Bool
+
+type Group
+   = NoOne
+   | GeneralPublic
+   | EmergencyServices
+   | Academic
+   | Commercial
+
+type alias ChannelEntitlement =
+    {
+        id : String
+        , groups : List Group
+        , visible : Visible
+    }
+
+type alias Entitlement =
+    List ChannelEntitlement
 
 
 -- UPDATE
@@ -91,6 +114,7 @@ type Msg
     = NoOp
     | LoadingFailed String
     | LoadingSuccess Metadata
+    | Show Group
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -100,8 +124,13 @@ update msg model =
         LoadingFailed error ->
             (model, Cmd.none)
         LoadingSuccess metadata ->
-            ( Model metadata.channels, Cmd.none)
+            ( Model metadata.channels (baseEntitlements metadata.channels), Cmd.none)
+        Show group ->
+            (model, Cmd.none)
 
+baseEntitlements : Channels -> List ChannelEntitlement
+baseEntitlements channels =
+    List.map (\x -> ChannelEntitlement x.id [ GeneralPublic ] True ) channels
 
 -- SUBSCRIPTIONS
 
@@ -120,12 +149,38 @@ view model =
     div []
         [
         text (toString model)
+        , div [] []
+        , drawGroupSelector 
         , div[] <| List.map drawChannel model.channels
         ]
 
 drawChannel : Channel -> Html Msg
 drawChannel channel = 
     div[] [text channel.id, text ":",  text (toString channel.value) ]
+
+drawGroupSelector :  Html Msg
+drawGroupSelector =
+    div []
+        [ fieldset []
+            [ label []
+                [ input [ type' "radio", name "group", checked True,  onClick (Show GeneralPublic) ] []
+                , text "General Public"
+            ]
+        , label []
+            [ input [ type' "radio", name "group", onClick (Show EmergencyServices) ] []
+            , text "Emergency Services"
+            ]
+        , label []
+            [ input [ type' "radio", name "group", onClick (Show Academic) ] []
+            , text "Academic"
+            ]
+        ,label []
+            [ input [ type' "radio", name "group", onClick (Show Commercial) ] []
+            , text "Commercial"
+            ]
+        ]
+    ]
+
 
 
 loadChannels : Cmd Msg
@@ -146,3 +201,7 @@ channelDecoder =
         ("value" := Json.Decode.int)
         ("recorded_at" := Json.Decode.string)
         ("units" := Json.Decode.string)
+
+
+
+
