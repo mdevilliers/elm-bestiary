@@ -131,6 +131,9 @@ update msg model =
 baseEntitlements : Channels -> List ChannelEntitlement
 baseEntitlements channels =
     List.map (\x -> ChannelEntitlement x.id [ GeneralPublic ] True ) channels
+    ++ List.map (\x -> ChannelEntitlement x.id [ EmergencyServices ] True ) channels
+    ++ List.map (\x -> ChannelEntitlement x.id [ Academic ] False ) channels
+    ++ List.map (\x -> ChannelEntitlement x.id [ Commercial ] False ) channels
 
 -- SUBSCRIPTIONS
 
