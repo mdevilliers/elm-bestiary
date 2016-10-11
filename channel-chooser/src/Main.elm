@@ -32,12 +32,13 @@ type alias Model =
     {
         channels : List Channel
         ,entitlement : Entitlement
+        , view : Maybe Group
     }
 
 
 initialModel : Model
 initialModel =
-    { channels = [], entitlement = [] }
+    { channels = [], entitlement = [], view = Nothing }
 
 
 init : ( Model, Cmd Msg )
@@ -84,14 +85,13 @@ type alias Metadata =
         channels : Channels
     }
 
-type alias Channels = 
+type alias Channels =
     List Channel
 
 type alias Visible = Bool
 
 type Group
-   = NoOne
-   | GeneralPublic
+   = GeneralPublic
    | EmergencyServices
    | Academic
    | Commercial
@@ -124,9 +124,9 @@ update msg model =
         LoadingFailed error ->
             (model, Cmd.none)
         LoadingSuccess metadata ->
-            ( Model metadata.channels (baseEntitlements metadata.channels), Cmd.none)
+            ( Model metadata.channels (baseEntitlements metadata.channels) (Just GeneralPublic) , Cmd.none)
         Show group ->
-            (model, Cmd.none)
+            ({ model | view = (Just group)}, Cmd.none)
 
 baseEntitlements : Channels -> List ChannelEntitlement
 baseEntitlements channels =
@@ -134,6 +134,12 @@ baseEntitlements channels =
     ++ List.map (\x -> ChannelEntitlement x.id [ EmergencyServices ] True ) channels
     ++ List.map (\x -> ChannelEntitlement x.id [ Academic ] False ) channels
     ++ List.map (\x -> ChannelEntitlement x.id [ Commercial ] False ) channels
+
+filterByView : List ChannelEntitlement -> Maybe Group -> List ChannelEntitlement 
+filterByView  entitlements group =
+    case group of
+        Nothing -> []
+        Just g -> List.filter (\c -> List.member g c.groups ) entitlements
 
 -- SUBSCRIPTIONS
 
@@ -154,12 +160,12 @@ view model =
         text (toString model)
         , div [] []
         , drawGroupSelector 
-        , div[] <| List.map drawChannel model.channels
+        , div[] <| List.map drawChannel ( filterByView model.entitlement model.view)
         ]
 
-drawChannel : Channel -> Html Msg
+drawChannel : ChannelEntitlement -> Html Msg
 drawChannel channel = 
-    div[] [text channel.id, text ":",  text (toString channel.value) ]
+    div[] [text channel.id, text ":",  text (toString channel.visible), text (toString channel.groups) ]
 
 drawGroupSelector :  Html Msg
 drawGroupSelector =
