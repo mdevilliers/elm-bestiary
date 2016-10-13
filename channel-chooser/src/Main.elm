@@ -141,9 +141,7 @@ type alias Owner =
     }
 
 
-
 -- UPDATE
-
 
 type Msg
     = NoOp
@@ -153,7 +151,7 @@ type Msg
     | DisableEntitlements
     | AddEntitlement Group
     | RemoveEntitlement Group
-    --| SetChannelVisiblity Entitlement ChannelEntitlement Bool
+    | SetLocationVisibility Entitlement Visible
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -183,12 +181,11 @@ update msg model =
             RemoveEntitlement group ->
                 ( { model | currentEntitlement = (removeEntitlement model.currentEntitlement group) }, Cmd.none )
 
-            --SetChannelVisiblity entitlement channel visible ->
-            --    let
-            --        channel' = {channel | visible = visible}
-            --        entitlement' = replaceChannel entitlement channel'
-            --    in
-            --    ( {model | currentEntitlement = (replaceEntitlements model.currentEntitlement entitlement')} , Cmd.none)
+            SetLocationVisibility entitlement visible ->
+                let
+                    entitlement' = {entitlement | locationVisbile = visible}
+                in
+                ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement')} , Cmd.none)
 
 
 newEntitlement : Group -> Metadata -> Entitlement
@@ -268,8 +265,8 @@ addEntitlement entitlements e =
                     Just (sortEntitlements (e :: x))
 
 
-replaceEntitlements : Maybe Entitlements -> Entitlement -> Maybe Entitlements
-replaceEntitlements entitlements e =
+replaceEntitlement : Maybe Entitlements -> Entitlement -> Maybe Entitlements
+replaceEntitlement entitlements e =
     let
         entitlements' =
             removeEntitlement entitlements e.group
@@ -353,10 +350,10 @@ drawGroupEditor entitlement metadata =
             , div [] []
             , a [ href "#", onClick (RemoveEntitlement entitlement.group) ] [ text "remove" ]
             , div [] []
-            --, label []
-            --    [ input [ type' "checkbox", checked (List.member ShowLocationDetails entitlement.modifiers), onClick (SetModifier entitlement ShowLocationDetails) ] []
-            --    , text "disclose location"
-            --    ]
+            , label []
+                [ input [ type' "checkbox", checked entitlement.locationVisbile , onClick (SetLocationVisibility entitlement ( flipVisibility entitlement.locationVisbile )) ] []
+                , text "disclose location"
+                ]
             , fieldset [] [ drawLocationView entitlement metadata.location ]
             , fieldset [] [ drawChannelsView entitlement ]
             ]
@@ -367,8 +364,7 @@ drawGroupEditor entitlement metadata =
 drawLocationView : Entitlement -> Location -> Html Msg
 drawLocationView entitlement location =
     let
-        showPrecise = False
-            --List.member ShowLocationDetails entitlement.modifiers
+        showPrecise = entitlement.locationVisbile
     in
         case showPrecise of
             False ->

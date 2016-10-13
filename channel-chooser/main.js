@@ -8742,7 +8742,7 @@ var _user$project$Main$drawChannelsView = function (ent) {
 };
 var _user$project$Main$drawLocationView = F2(
 	function (entitlement, location) {
-		var showPrecise = false;
+		var showPrecise = entitlement.locationVisbile;
 		var _p0 = showPrecise;
 		if (_p0 === false) {
 			return A2(
@@ -8839,7 +8839,7 @@ var _user$project$Main$removeEntitlement = F2(
 			}
 		}
 	});
-var _user$project$Main$replaceEntitlements = F2(
+var _user$project$Main$replaceEntitlement = F2(
 	function (entitlements, e) {
 		var entitlements$ = A2(_user$project$Main$removeEntitlement, entitlements, e.group);
 		return A2(_user$project$Main$addEntitlement, entitlements$, e);
@@ -9035,13 +9035,26 @@ var _user$project$Main$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'RemoveEntitlement':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
 							currentEntitlement: A2(_user$project$Main$removeEntitlement, model.currentEntitlement, _p10._0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				var entitlement$ = _elm_lang$core$Native_Utils.update(
+					_p10._0,
+					{locationVisbile: _p10._1});
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							currentEntitlement: A2(_user$project$Main$replaceEntitlement, model.currentEntitlement, entitlement$)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -9087,6 +9100,10 @@ var _user$project$Main$onSelect = function (msg) {
 		'change',
 		A2(_elm_lang$core$Json_Decode$map, msg, _user$project$Main$groupSelectorDecoder));
 };
+var _user$project$Main$SetLocationVisibility = F2(
+	function (a, b) {
+		return {ctor: 'SetLocationVisibility', _0: a, _1: b};
+	});
 var _user$project$Main$RemoveEntitlement = function (a) {
 	return {ctor: 'RemoveEntitlement', _0: a};
 };
@@ -9130,6 +9147,28 @@ var _user$project$Main$drawGroupEditor = F2(
 								[]),
 							_elm_lang$core$Native_List.fromArray(
 								[])),
+							A2(
+							_elm_lang$html$Html$label,
+							_elm_lang$core$Native_List.fromArray(
+								[]),
+							_elm_lang$core$Native_List.fromArray(
+								[
+									A2(
+									_elm_lang$html$Html$input,
+									_elm_lang$core$Native_List.fromArray(
+										[
+											_elm_lang$html$Html_Attributes$type$('checkbox'),
+											_elm_lang$html$Html_Attributes$checked(entitlement.locationVisbile),
+											_elm_lang$html$Html_Events$onClick(
+											A2(
+												_user$project$Main$SetLocationVisibility,
+												entitlement,
+												_user$project$Main$flipVisibility(entitlement.locationVisbile)))
+										]),
+									_elm_lang$core$Native_List.fromArray(
+										[])),
+									_elm_lang$html$Html$text('disclose location')
+								])),
 							A2(
 							_elm_lang$html$Html$fieldset,
 							_elm_lang$core$Native_List.fromArray(
