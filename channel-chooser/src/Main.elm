@@ -163,8 +163,6 @@ type Msg
     | AddEntitlement Group
     | RemoveEntitlement Group
     | SetModifier Entitlement Modifier
-    | Show Group
-    | Flip ChannelEntitlement
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -204,12 +202,6 @@ update msg model =
                         { entitlement | modifiers = modifiers }
                 in
                     ( { model | currentEntitlement = (replaceEntitlements model.currentEntitlement entitlement') }, Cmd.none )
-
-            Show group ->
-                ( model, Cmd.none )
-
-            Flip channelEntitlement ->
-                ( model, Cmd.none )
 
 
 newEntitlement : Group -> Metadata -> Entitlement

@@ -8814,7 +8814,7 @@ var _user$project$Main$flipVisibility = function (visible) {
 		return true;
 	}
 };
-var _user$project$Main$channelData = '\n    {   \n    \"owner\" : {\n        \"name\" : \"John Smith\",\n        \"email\" : \"john@smith.com\"\n    },\n    \"location\" : {\n        \"latitude\" : 1.23,\n        \"longitude\" : 3.45,\n        \"address\" : \"SW1 London GB\"\n    },\n    \"channels\": [\n    {\n        \"id\": \"bikes\",\n        \"value\": 15,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"bikes\"\n    },\n    {\n        \"id\": \"open_or_total_docks\",\n        \"value\": 16,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"bikes\"\n    },\n    {\n        \"id\": \"spaces\",\n        \"value\": 0,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"spaces\"\n    }]\n}\n';
+var _user$project$Main$channelData = '\n    {\n    \"owner\" : {\n        \"name\" : \"John Smith\",\n        \"email\" : \"john@smith.com\"\n    },\n    \"location\" : {\n        \"latitude\" : 1.23,\n        \"longitude\" : 3.45,\n        \"address\" : \"SW1 London GB\"\n    },\n    \"channels\": [\n    {\n        \"id\": \"bikes\",\n        \"value\": 15,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"bikes\"\n    },\n    {\n        \"id\": \"open_or_total_docks\",\n        \"value\": 16,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"bikes\"\n    },\n    {\n        \"id\": \"spaces\",\n        \"value\": 0,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"spaces\"\n    }]\n}\n';
 var _user$project$Main$Model = F2(
 	function (a, b) {
 		return {currentEntitlement: a, metadata: b};
@@ -8963,7 +8963,7 @@ var _user$project$Main$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'SetModifier':
+			default:
 				var _p10 = _p9._0;
 				var modifiers = A2(_user$project$Main$addOrRemove, _p10.modifiers, _p9._1);
 				var entitlement$ = _elm_lang$core$Native_Utils.update(
@@ -8978,10 +8978,6 @@ var _user$project$Main$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'Show':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			default:
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
 var _user$project$Main$allGroupsForDropdown = _elm_lang$core$Native_List.fromArray(
@@ -9117,12 +9113,6 @@ var _user$project$Main$drawLocationView = F2(
 					]));
 		}
 	});
-var _user$project$Main$Flip = function (a) {
-	return {ctor: 'Flip', _0: a};
-};
-var _user$project$Main$Show = function (a) {
-	return {ctor: 'Show', _0: a};
-};
 var _user$project$Main$SetModifier = F2(
 	function (a, b) {
 		return {ctor: 'SetModifier', _0: a, _1: b};
