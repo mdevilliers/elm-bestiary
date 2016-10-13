@@ -8704,32 +8704,6 @@ var _evancz$elm_http$Http$post = F3(
 			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request));
 	});
 
-var _user$project$Main$drawChannel = F2(
-	function (channelEntitlement, showValues) {
-		var _p0 = showValues;
-		if (_p0 === true) {
-			return A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(channelEntitlement.channel.id),
-						_elm_lang$html$Html$text(' : '),
-						_elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(channelEntitlement.channel.value))
-					]));
-		} else {
-			return A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(channelEntitlement.channel.id)
-					]));
-		}
-	});
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
@@ -8745,32 +8719,32 @@ var _user$project$Main$sortEntitlements = function (e) {
 };
 var _user$project$Main$addEntitlement = F2(
 	function (entitlements, e) {
-		var _p1 = entitlements;
-		if (_p1.ctor === 'Nothing') {
+		var _p0 = entitlements;
+		if (_p0.ctor === 'Nothing') {
 			return _elm_lang$core$Maybe$Just(
 				_elm_lang$core$Native_List.fromArray(
 					[e]));
 		} else {
-			var _p3 = _p1._0;
-			var _p2 = A2(
+			var _p2 = _p0._0;
+			var _p1 = A2(
 				_elm_lang$core$List$any,
 				function (t) {
 					return _elm_lang$core$Native_Utils.eq(t.group, e.group);
 				},
-				_p3);
-			if (_p2 === true) {
+				_p2);
+			if (_p1 === true) {
 				return entitlements;
 			} else {
 				return _elm_lang$core$Maybe$Just(
 					_user$project$Main$sortEntitlements(
-						A2(_elm_lang$core$List_ops['::'], e, _p3)));
+						A2(_elm_lang$core$List_ops['::'], e, _p2)));
 			}
 		}
 	});
 var _user$project$Main$removeEntitlement = F2(
 	function (entitlements, group) {
-		var _p4 = entitlements;
-		if (_p4.ctor === 'Nothing') {
+		var _p3 = entitlements;
+		if (_p3.ctor === 'Nothing') {
 			return entitlements;
 		} else {
 			var x$ = A2(
@@ -8778,9 +8752,9 @@ var _user$project$Main$removeEntitlement = F2(
 				function (e) {
 					return !_elm_lang$core$Native_Utils.eq(e.group, group);
 				},
-				_p4._0);
-			var _p5 = x$;
-			if (_p5.ctor === '[]') {
+				_p3._0);
+			var _p4 = x$;
+			if (_p4.ctor === '[]') {
 				return _elm_lang$core$Maybe$Nothing;
 			} else {
 				return _elm_lang$core$Maybe$Just(x$);
@@ -8791,6 +8765,29 @@ var _user$project$Main$replaceEntitlements = F2(
 	function (entitlements, e) {
 		var entitlements$ = A2(_user$project$Main$removeEntitlement, entitlements, e.group);
 		return A2(_user$project$Main$addEntitlement, entitlements$, e);
+	});
+var _user$project$Main$replaceChannel = F2(
+	function (entitlement, channel) {
+		var _p5 = A2(
+			_elm_lang$core$List$filter,
+			function (c) {
+				return !_elm_lang$core$Native_Utils.eq(c.channel.id, channel.channel.id);
+			},
+			entitlement.channels);
+		if (_p5.ctor === '[]') {
+			return _elm_lang$core$Native_Utils.update(
+				entitlement,
+				{
+					channels: _elm_lang$core$Native_List.fromArray(
+						[channel])
+				});
+		} else {
+			return _elm_lang$core$Native_Utils.update(
+				entitlement,
+				{
+					channels: A2(_elm_lang$core$List_ops['::'], channel, _p5)
+				});
+		}
 	});
 var _user$project$Main$addOrRemove = F2(
 	function (l, m) {
@@ -8963,12 +8960,26 @@ var _user$project$Main$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'SetModifier':
 				var _p10 = _p9._0;
 				var modifiers = A2(_user$project$Main$addOrRemove, _p10.modifiers, _p9._1);
 				var entitlement$ = _elm_lang$core$Native_Utils.update(
 					_p10,
 					{modifiers: modifiers});
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							currentEntitlement: A2(_user$project$Main$replaceEntitlements, model.currentEntitlement, entitlement$)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				var channel$ = _elm_lang$core$Native_Utils.update(
+					_p9._1,
+					{visible: _p9._2});
+				var entitlement$ = A2(_user$project$Main$replaceChannel, _p9._0, channel$);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -9021,19 +9032,6 @@ var _user$project$Main$onSelect = function (msg) {
 		A2(_elm_lang$core$Json_Decode$map, msg, _user$project$Main$groupSelectorDecoder));
 };
 var _user$project$Main$ShowChannelDetails = {ctor: 'ShowChannelDetails'};
-var _user$project$Main$drawChannelsView = function (ent) {
-	var showValues = A2(_elm_lang$core$List$member, _user$project$Main$ShowChannelDetails, ent.modifiers);
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		A2(
-			_elm_lang$core$List$map,
-			function (x) {
-				return A2(_user$project$Main$drawChannel, x, showValues);
-			},
-			ent.channels));
-};
 var _user$project$Main$ShowOwnerDetails = {ctor: 'ShowOwnerDetails'};
 var _user$project$Main$drawOwnerView = F2(
 	function (entitlement, owner) {
@@ -9080,7 +9078,6 @@ var _user$project$Main$drawLocationView = F2(
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html$text('address : '),
 						_elm_lang$html$Html$text(location.address)
 					]));
 		} else {
@@ -9113,6 +9110,61 @@ var _user$project$Main$drawLocationView = F2(
 					]));
 		}
 	});
+var _user$project$Main$SetChannelVisiblity = F3(
+	function (a, b, c) {
+		return {ctor: 'SetChannelVisiblity', _0: a, _1: b, _2: c};
+	});
+var _user$project$Main$drawChannel = F3(
+	function (entitlement, channelEntitlement, showValues) {
+		var _p14 = showValues;
+		if (_p14 === true) {
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(channelEntitlement.channel.id),
+						_elm_lang$html$Html$text(' : '),
+						_elm_lang$html$Html$text(
+						_elm_lang$core$Basics$toString(channelEntitlement.channel.value)),
+						A2(
+						_elm_lang$html$Html$a,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$href('#'),
+								_elm_lang$html$Html_Events$onClick(
+								A3(_user$project$Main$SetChannelVisiblity, entitlement, channelEntitlement, false))
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('hide')
+							]))
+					]));
+		} else {
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(channelEntitlement.channel.id)
+					]));
+		}
+	});
+var _user$project$Main$drawChannelsView = function (ent) {
+	var showValues = A2(_elm_lang$core$List$member, _user$project$Main$ShowChannelDetails, ent.modifiers);
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(
+			_elm_lang$core$List$map,
+			function (channel) {
+				return A3(_user$project$Main$drawChannel, ent, channel, showValues);
+			},
+			ent.channels));
+};
 var _user$project$Main$SetModifier = F2(
 	function (a, b) {
 		return {ctor: 'SetModifier', _0: a, _1: b};
@@ -9265,19 +9317,19 @@ var _user$project$Main$drawGroupSelector = function (entitlements) {
 					]),
 				A2(
 					_elm_lang$core$List$map,
-					function (_p14) {
-						var _p15 = _p14;
+					function (_p15) {
+						var _p16 = _p15;
 						return A2(
 							_elm_lang$html$Html$option,
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html_Attributes$value(
-									_elm_lang$core$Basics$toString(_p15._1))
+									_elm_lang$core$Basics$toString(_p16._1))
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html$text(
-									_elm_lang$core$Basics$toString(_p15._0))
+									_elm_lang$core$Basics$toString(_p16._0))
 								]));
 					},
 					_user$project$Main$allGroupsForDropdown))
@@ -9286,8 +9338,8 @@ var _user$project$Main$drawGroupSelector = function (entitlements) {
 var _user$project$Main$DisableEntitlements = {ctor: 'DisableEntitlements'};
 var _user$project$Main$EnableEntitlements = {ctor: 'EnableEntitlements'};
 var _user$project$Main$entitlementSelectorAction = function (b) {
-	var _p16 = b;
-	if (_p16 === false) {
+	var _p17 = b;
+	if (_p17 === false) {
 		return _user$project$Main$EnableEntitlements;
 	} else {
 		return _user$project$Main$DisableEntitlements;
@@ -9329,11 +9381,11 @@ var _user$project$Main$drawEntitlementSelector = function (selected) {
 			]));
 };
 var _user$project$Main$drawEntitlementEditor = function (model) {
-	var _p17 = model.currentEntitlement;
-	if (_p17.ctor === 'Nothing') {
+	var _p18 = model.currentEntitlement;
+	if (_p18.ctor === 'Nothing') {
 		return _user$project$Main$drawEntitlementSelector(false);
 	} else {
-		var _p18 = _p17._0;
+		var _p19 = _p18._0;
 		return A2(
 			_elm_lang$html$Html$div,
 			_elm_lang$core$Native_List.fromArray(
@@ -9350,8 +9402,8 @@ var _user$project$Main$drawEntitlementEditor = function (model) {
 						function (n) {
 							return A2(_user$project$Main$drawGroupEditor, n, model.metadata);
 						},
-						_p18)),
-					_user$project$Main$drawGroupSelector(_p18)
+						_p19)),
+					_user$project$Main$drawGroupSelector(_p19)
 				]));
 	}
 };

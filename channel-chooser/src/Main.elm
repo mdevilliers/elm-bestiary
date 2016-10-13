@@ -163,7 +163,7 @@ type Msg
     | AddEntitlement Group
     | RemoveEntitlement Group
     | SetModifier Entitlement Modifier
-
+    | SetChannelVisiblity Entitlement ChannelEntitlement Bool
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -193,7 +193,7 @@ update msg model =
             RemoveEntitlement group ->
                 ( { model | currentEntitlement = (removeEntitlement model.currentEntitlement group) }, Cmd.none )
 
-            SetModifier entitlement modifier ->
+            SetModifier entitlement modifier->
                 let
                     modifiers =
                         addOrRemove entitlement.modifiers modifier
@@ -202,6 +202,12 @@ update msg model =
                         { entitlement | modifiers = modifiers }
                 in
                     ( { model | currentEntitlement = (replaceEntitlements model.currentEntitlement entitlement') }, Cmd.none )
+            SetChannelVisiblity entitlement channel visible ->
+                let
+                    channel' = {channel | visible = visible}
+                    entitlement' = replaceChannel entitlement channel'
+                in
+                ( {model | currentEntitlement = (replaceEntitlements model.currentEntitlement entitlement')} , Cmd.none)
 
 
 newEntitlement : Group -> Metadata -> Entitlement
@@ -231,6 +237,13 @@ addOrRemove l m =
 
         False ->
             m :: l
+
+
+replaceChannel : Entitlement -> ChannelEntitlement -> Entitlement
+replaceChannel entitlement channel =
+       case List.filter (\c -> c.channel.id /= channel.channel.id ) entitlement.channels of
+           [] ->  {entitlement | channels = [channel]}
+           x ->   {entitlement | channels = channel :: x }
 
 
 removeEntitlement : Maybe Entitlements -> Group -> Maybe Entitlements
@@ -401,8 +414,7 @@ drawLocationView entitlement location =
         case showPrecise of
             False ->
                 div []
-                    [ text "address : "
-                    , text location.address
+                    [ text location.address
                     ]
 
             True ->
@@ -424,14 +436,17 @@ drawChannelsView ent =
         showValues =
             List.member ShowChannelDetails ent.modifiers
     in
-        div [] <| List.map (\x -> drawChannel x showValues) ent.channels
+        div [] <| List.map (\channel -> drawChannel ent channel showValues) ent.channels
 
 
-drawChannel : ChannelEntitlement -> Bool -> Html Msg
-drawChannel channelEntitlement showValues =
+drawChannel : Entitlement -> ChannelEntitlement -> Bool -> Html Msg
+drawChannel entitlement channelEntitlement showValues =
     case showValues of
         True ->
-            div [] [ text channelEntitlement.channel.id, text " : ", text (toString channelEntitlement.channel.value) ]
+            div [] [ text channelEntitlement.channel.id, text " : "
+                   , text (toString channelEntitlement.channel.value)
+                   , a[ href "#", onClick (SetChannelVisiblity entitlement channelEntitlement False )] [text "hide"]
+                   ]
 
         False ->
             div [] [ text channelEntitlement.channel.id ]
