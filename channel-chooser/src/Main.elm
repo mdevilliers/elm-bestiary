@@ -112,35 +112,28 @@ type Group
 
 type alias ChannelEntitlement =
     { channel : Channel
-    , visible : Visible
+    , discoverable : Visible
+    , accessible : Visible
     }
 
 
 type alias ChannelEntitlements =
     List ChannelEntitlement
 
-
-type Modifier
-    = ShowLocationDetails
-    | ShowOwnerDetails
-
 type alias Entitlements =
     List Entitlement
 
-
 type alias Entitlement =
     { group : Group
-    , modifiers : List Modifier
     , channels : ChannelEntitlements
+    , locationVisbile : Visible
     }
-
 
 type alias Location =
     { longitude : Float
     , latitude : Float
     , address : String
     }
-
 
 type alias Owner =
     { name : String
@@ -160,8 +153,7 @@ type Msg
     | DisableEntitlements
     | AddEntitlement Group
     | RemoveEntitlement Group
-    | SetModifier Entitlement Modifier
-    | SetChannelVisiblity Entitlement ChannelEntitlement Bool
+    --| SetChannelVisiblity Entitlement ChannelEntitlement Bool
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -191,30 +183,21 @@ update msg model =
             RemoveEntitlement group ->
                 ( { model | currentEntitlement = (removeEntitlement model.currentEntitlement group) }, Cmd.none )
 
-            SetModifier entitlement modifier->
-                let
-                    modifiers =
-                        addOrRemove entitlement.modifiers modifier
-
-                    entitlement' =
-                        { entitlement | modifiers = modifiers }
-                in
-                    ( { model | currentEntitlement = (replaceEntitlements model.currentEntitlement entitlement') }, Cmd.none )
-            SetChannelVisiblity entitlement channel visible ->
-                let
-                    channel' = {channel | visible = visible}
-                    entitlement' = replaceChannel entitlement channel'
-                in
-                ( {model | currentEntitlement = (replaceEntitlements model.currentEntitlement entitlement')} , Cmd.none)
+            --SetChannelVisiblity entitlement channel visible ->
+            --    let
+            --        channel' = {channel | visible = visible}
+            --        entitlement' = replaceChannel entitlement channel'
+            --    in
+            --    ( {model | currentEntitlement = (replaceEntitlements model.currentEntitlement entitlement')} , Cmd.none)
 
 
 newEntitlement : Group -> Metadata -> Entitlement
 newEntitlement g metadata =
     let
         channelEntitlements =
-            List.map (\c -> ChannelEntitlement c False) metadata.channels
+            List.map (\c -> ChannelEntitlement c False False) metadata.channels
     in
-        (Entitlement g [] channelEntitlements)
+        (Entitlement g (sortChannelEntitlements channelEntitlements) False)
 
 
 flipVisibility : Visible -> Visible
@@ -241,8 +224,15 @@ replaceChannel : Entitlement -> ChannelEntitlement -> Entitlement
 replaceChannel entitlement channel =
        case List.filter (\c -> c.channel.id /= channel.channel.id ) entitlement.channels of
            [] ->  {entitlement | channels = [channel]}
-           x ->   {entitlement | channels = channel :: x }
+           x ->   {entitlement | channels =  sortChannelEntitlements ( channel :: x ) }
 
+sortChannelEntitlements : ChannelEntitlements -> ChannelEntitlements 
+sortChannelEntitlements channels =
+        List.sortWith channelEntitlementSorter channels
+
+channelEntitlementSorter : ChannelEntitlement -> ChannelEntitlement -> Order
+channelEntitlementSorter a b =
+    compare a.channel.id b.channel.id
 
 removeEntitlement : Maybe Entitlements -> Group -> Maybe Entitlements
 removeEntitlement entitlements group =
@@ -313,9 +303,9 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text (toString model)
-        , div [] []
-        , drawEntitlementEditor model
+        [-- text (toString model)
+        --, div [] []
+         drawEntitlementEditor model
         ]
 
 
@@ -363,47 +353,22 @@ drawGroupEditor entitlement metadata =
             , div [] []
             , a [ href "#", onClick (RemoveEntitlement entitlement.group) ] [ text "remove" ]
             , div [] []
-            , label []
-                [ input [ type' "checkbox", checked (List.member ShowLocationDetails entitlement.modifiers), onClick (SetModifier entitlement ShowLocationDetails) ] []
-                , text "disclose location"
-                ]
-            , label []
-                [ input [ type' "checkbox", checked (List.member ShowOwnerDetails entitlement.modifiers), onClick (SetModifier entitlement ShowOwnerDetails) ] []
-                , text "disclose your details"
-                ]
+            --, label []
+            --    [ input [ type' "checkbox", checked (List.member ShowLocationDetails entitlement.modifiers), onClick (SetModifier entitlement ShowLocationDetails) ] []
+            --    , text "disclose location"
+            --    ]
             , fieldset [] [ drawLocationView entitlement metadata.location ]
-            , fieldset [] [ drawOwnerView entitlement metadata.owner ]
             , fieldset [] [ drawChannelsView entitlement ]
             ]
           -- end of fieldset
         ]
 
 
-drawOwnerView : Entitlement -> Owner -> Html Msg
-drawOwnerView entitlement owner =
-    let
-        showPrecise =
-            List.member ShowOwnerDetails entitlement.modifiers
-    in
-        case showPrecise of
-            False ->
-                div [] [ text "no details disclosed" ]
-
-            True ->
-                div []
-                    [ text "name : "
-                    , text owner.name
-                    , div [] []
-                    , text "email : "
-                    , text owner.email
-                    ]
-
-
 drawLocationView : Entitlement -> Location -> Html Msg
 drawLocationView entitlement location =
     let
-        showPrecise =
-            List.member ShowLocationDetails entitlement.modifiers
+        showPrecise = False
+            --List.member ShowLocationDetails entitlement.modifiers
     in
         case showPrecise of
             False ->
@@ -430,17 +395,17 @@ drawChannelsView ent =
 
 drawChannel : Entitlement -> ChannelEntitlement -> Html Msg
 drawChannel entitlement channelEntitlement =
-    case channelEntitlement.visible of
-        True ->
+    --case channelEntitlement.visible of
+    --    True ->
             div [] [ text channelEntitlement.channel.id, text " : "
                    , text (toString channelEntitlement.channel.value)
-                   , a[ href "#", onClick (SetChannelVisiblity entitlement channelEntitlement False )] [text "hide"]
+                   , a[ href "#"] [text "hide"]
                    ]
 
-        False ->
-            div [] [ text channelEntitlement.channel.id
-                     , a[ href "#", onClick (SetChannelVisiblity entitlement channelEntitlement True )] [text "show"]
-                   ]
+    --    False ->
+    --        div [] [ text channelEntitlement.channel.id
+    --                 , a[ href "#"] [text "show"]
+    --               ]
 
 drawGroupSelector : Entitlements -> Html Msg
 drawGroupSelector entitlements =

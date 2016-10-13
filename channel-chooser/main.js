@@ -8704,6 +8704,84 @@ var _evancz$elm_http$Http$post = F3(
 			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request));
 	});
 
+var _user$project$Main$drawChannel = F2(
+	function (entitlement, channelEntitlement) {
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text(channelEntitlement.channel.id),
+					_elm_lang$html$Html$text(' : '),
+					_elm_lang$html$Html$text(
+					_elm_lang$core$Basics$toString(channelEntitlement.channel.value)),
+					A2(
+					_elm_lang$html$Html$a,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$href('#')
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text('hide')
+						]))
+				]));
+	});
+var _user$project$Main$drawChannelsView = function (ent) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(
+			_elm_lang$core$List$map,
+			function (channel) {
+				return A2(_user$project$Main$drawChannel, ent, channel);
+			},
+			ent.channels));
+};
+var _user$project$Main$drawLocationView = F2(
+	function (entitlement, location) {
+		var showPrecise = false;
+		var _p0 = showPrecise;
+		if (_p0 === false) {
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(location.address)
+					]));
+		} else {
+			return A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(location.address),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						_elm_lang$html$Html$text('latitude : '),
+						_elm_lang$html$Html$text(
+						_elm_lang$core$Basics$toString(location.latitude)),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						_elm_lang$html$Html$text('longitude :'),
+						_elm_lang$html$Html$text(
+						_elm_lang$core$Basics$toString(location.longitude))
+					]));
+		}
+	});
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
@@ -8719,32 +8797,32 @@ var _user$project$Main$sortEntitlements = function (e) {
 };
 var _user$project$Main$addEntitlement = F2(
 	function (entitlements, e) {
-		var _p0 = entitlements;
-		if (_p0.ctor === 'Nothing') {
+		var _p1 = entitlements;
+		if (_p1.ctor === 'Nothing') {
 			return _elm_lang$core$Maybe$Just(
 				_elm_lang$core$Native_List.fromArray(
 					[e]));
 		} else {
-			var _p2 = _p0._0;
-			var _p1 = A2(
+			var _p3 = _p1._0;
+			var _p2 = A2(
 				_elm_lang$core$List$any,
 				function (t) {
 					return _elm_lang$core$Native_Utils.eq(t.group, e.group);
 				},
-				_p2);
-			if (_p1 === true) {
+				_p3);
+			if (_p2 === true) {
 				return entitlements;
 			} else {
 				return _elm_lang$core$Maybe$Just(
 					_user$project$Main$sortEntitlements(
-						A2(_elm_lang$core$List_ops['::'], e, _p2)));
+						A2(_elm_lang$core$List_ops['::'], e, _p3)));
 			}
 		}
 	});
 var _user$project$Main$removeEntitlement = F2(
 	function (entitlements, group) {
-		var _p3 = entitlements;
-		if (_p3.ctor === 'Nothing') {
+		var _p4 = entitlements;
+		if (_p4.ctor === 'Nothing') {
 			return entitlements;
 		} else {
 			var x$ = A2(
@@ -8752,9 +8830,9 @@ var _user$project$Main$removeEntitlement = F2(
 				function (e) {
 					return !_elm_lang$core$Native_Utils.eq(e.group, group);
 				},
-				_p3._0);
-			var _p4 = x$;
-			if (_p4.ctor === '[]') {
+				_p4._0);
+			var _p5 = x$;
+			if (_p5.ctor === '[]') {
 				return _elm_lang$core$Maybe$Nothing;
 			} else {
 				return _elm_lang$core$Maybe$Just(x$);
@@ -8766,15 +8844,22 @@ var _user$project$Main$replaceEntitlements = F2(
 		var entitlements$ = A2(_user$project$Main$removeEntitlement, entitlements, e.group);
 		return A2(_user$project$Main$addEntitlement, entitlements$, e);
 	});
+var _user$project$Main$channelEntitlementSorter = F2(
+	function (a, b) {
+		return A2(_elm_lang$core$Basics$compare, a.channel.id, b.channel.id);
+	});
+var _user$project$Main$sortChannelEntitlements = function (channels) {
+	return A2(_elm_lang$core$List$sortWith, _user$project$Main$channelEntitlementSorter, channels);
+};
 var _user$project$Main$replaceChannel = F2(
 	function (entitlement, channel) {
-		var _p5 = A2(
+		var _p6 = A2(
 			_elm_lang$core$List$filter,
 			function (c) {
 				return !_elm_lang$core$Native_Utils.eq(c.channel.id, channel.channel.id);
 			},
 			entitlement.channels);
-		if (_p5.ctor === '[]') {
+		if (_p6.ctor === '[]') {
 			return _elm_lang$core$Native_Utils.update(
 				entitlement,
 				{
@@ -8785,14 +8870,15 @@ var _user$project$Main$replaceChannel = F2(
 			return _elm_lang$core$Native_Utils.update(
 				entitlement,
 				{
-					channels: A2(_elm_lang$core$List_ops['::'], channel, _p5)
+					channels: _user$project$Main$sortChannelEntitlements(
+						A2(_elm_lang$core$List_ops['::'], channel, _p6))
 				});
 		}
 	});
 var _user$project$Main$addOrRemove = F2(
 	function (l, m) {
-		var _p6 = A2(_elm_lang$core$List$member, m, l);
-		if (_p6 === true) {
+		var _p7 = A2(_elm_lang$core$List$member, m, l);
+		if (_p7 === true) {
 			return A2(
 				_elm_lang$core$List$filter,
 				function (x) {
@@ -8804,8 +8890,8 @@ var _user$project$Main$addOrRemove = F2(
 		}
 	});
 var _user$project$Main$flipVisibility = function (visible) {
-	var _p7 = visible;
-	if (_p7 === true) {
+	var _p8 = visible;
+	if (_p8 === true) {
 		return false;
 	} else {
 		return true;
@@ -8831,28 +8917,27 @@ var _user$project$Main$Metadata = F3(
 	function (a, b, c) {
 		return {channels: a, location: b, owner: c};
 	});
-var _user$project$Main$ChannelEntitlement = F2(
-	function (a, b) {
-		return {channel: a, visible: b};
+var _user$project$Main$ChannelEntitlement = F3(
+	function (a, b, c) {
+		return {channel: a, discoverable: b, accessible: c};
 	});
 var _user$project$Main$Entitlement = F3(
 	function (a, b, c) {
-		return {group: a, modifiers: b, channels: c};
+		return {group: a, channels: b, locationVisbile: c};
 	});
 var _user$project$Main$newEntitlement = F2(
 	function (g, metadata) {
 		var channelEntitlements = A2(
 			_elm_lang$core$List$map,
 			function (c) {
-				return A2(_user$project$Main$ChannelEntitlement, c, false);
+				return A3(_user$project$Main$ChannelEntitlement, c, false, false);
 			},
 			metadata.channels);
 		return A3(
 			_user$project$Main$Entitlement,
 			g,
-			_elm_lang$core$Native_List.fromArray(
-				[]),
-			channelEntitlements);
+			_user$project$Main$sortChannelEntitlements(channelEntitlements),
+			false);
 	});
 var _user$project$Main$Location = F3(
 	function (a, b, c) {
@@ -8898,12 +8983,12 @@ var _user$project$Main$EmergencyServices = {ctor: 'EmergencyServices'};
 var _user$project$Main$GeneralPublic = {ctor: 'GeneralPublic'};
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p8 = A2(
+		var _p9 = A2(
 			_elm_lang$core$Debug$log,
 			'update :',
 			_elm_lang$core$Basics$toString(msg));
-		var _p9 = msg;
-		switch (_p9.ctor) {
+		var _p10 = msg;
+		switch (_p10.ctor) {
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'LoadingFailed':
@@ -8913,7 +8998,7 @@ var _user$project$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{metadata: _p9._0}),
+						{metadata: _p10._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'EnableEntitlements':
@@ -8946,46 +9031,17 @@ var _user$project$Main$update = F2(
 							currentEntitlement: A2(
 								_user$project$Main$addEntitlement,
 								model.currentEntitlement,
-								A2(_user$project$Main$newEntitlement, _p9._0, model.metadata))
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'RemoveEntitlement':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							currentEntitlement: A2(_user$project$Main$removeEntitlement, model.currentEntitlement, _p9._0)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SetModifier':
-				var _p10 = _p9._0;
-				var modifiers = A2(_user$project$Main$addOrRemove, _p10.modifiers, _p9._1);
-				var entitlement$ = _elm_lang$core$Native_Utils.update(
-					_p10,
-					{modifiers: modifiers});
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							currentEntitlement: A2(_user$project$Main$replaceEntitlements, model.currentEntitlement, entitlement$)
+								A2(_user$project$Main$newEntitlement, _p10._0, model.metadata))
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
-				var channel$ = _elm_lang$core$Native_Utils.update(
-					_p9._1,
-					{visible: _p9._2});
-				var entitlement$ = A2(_user$project$Main$replaceChannel, _p9._0, channel$);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							currentEntitlement: A2(_user$project$Main$replaceEntitlements, model.currentEntitlement, entitlement$)
+							currentEntitlement: A2(_user$project$Main$removeEntitlement, model.currentEntitlement, _p10._0)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -9031,153 +9087,6 @@ var _user$project$Main$onSelect = function (msg) {
 		'change',
 		A2(_elm_lang$core$Json_Decode$map, msg, _user$project$Main$groupSelectorDecoder));
 };
-var _user$project$Main$ShowOwnerDetails = {ctor: 'ShowOwnerDetails'};
-var _user$project$Main$drawOwnerView = F2(
-	function (entitlement, owner) {
-		var showPrecise = A2(_elm_lang$core$List$member, _user$project$Main$ShowOwnerDetails, entitlement.modifiers);
-		var _p12 = showPrecise;
-		if (_p12 === false) {
-			return A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('no details disclosed')
-					]));
-		} else {
-			return A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('name : '),
-						_elm_lang$html$Html$text(owner.name),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[])),
-						_elm_lang$html$Html$text('email : '),
-						_elm_lang$html$Html$text(owner.email)
-					]));
-		}
-	});
-var _user$project$Main$ShowLocationDetails = {ctor: 'ShowLocationDetails'};
-var _user$project$Main$drawLocationView = F2(
-	function (entitlement, location) {
-		var showPrecise = A2(_elm_lang$core$List$member, _user$project$Main$ShowLocationDetails, entitlement.modifiers);
-		var _p13 = showPrecise;
-		if (_p13 === false) {
-			return A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(location.address)
-					]));
-		} else {
-			return A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(location.address),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[])),
-						_elm_lang$html$Html$text('latitude : '),
-						_elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(location.latitude)),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[])),
-						_elm_lang$html$Html$text('longitude :'),
-						_elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(location.longitude))
-					]));
-		}
-	});
-var _user$project$Main$SetChannelVisiblity = F3(
-	function (a, b, c) {
-		return {ctor: 'SetChannelVisiblity', _0: a, _1: b, _2: c};
-	});
-var _user$project$Main$drawChannel = F2(
-	function (entitlement, channelEntitlement) {
-		var _p14 = channelEntitlement.visible;
-		if (_p14 === true) {
-			return A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(channelEntitlement.channel.id),
-						_elm_lang$html$Html$text(' : '),
-						_elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(channelEntitlement.channel.value)),
-						A2(
-						_elm_lang$html$Html$a,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$href('#'),
-								_elm_lang$html$Html_Events$onClick(
-								A3(_user$project$Main$SetChannelVisiblity, entitlement, channelEntitlement, false))
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text('hide')
-							]))
-					]));
-		} else {
-			return A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(channelEntitlement.channel.id),
-						A2(
-						_elm_lang$html$Html$a,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$href('#'),
-								_elm_lang$html$Html_Events$onClick(
-								A3(_user$project$Main$SetChannelVisiblity, entitlement, channelEntitlement, true))
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text('show')
-							]))
-					]));
-		}
-	});
-var _user$project$Main$drawChannelsView = function (ent) {
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		A2(
-			_elm_lang$core$List$map,
-			function (channel) {
-				return A2(_user$project$Main$drawChannel, ent, channel);
-			},
-			ent.channels));
-};
-var _user$project$Main$SetModifier = F2(
-	function (a, b) {
-		return {ctor: 'SetModifier', _0: a, _1: b};
-	});
 var _user$project$Main$RemoveEntitlement = function (a) {
 	return {ctor: 'RemoveEntitlement', _0: a};
 };
@@ -9222,60 +9131,12 @@ var _user$project$Main$drawGroupEditor = F2(
 							_elm_lang$core$Native_List.fromArray(
 								[])),
 							A2(
-							_elm_lang$html$Html$label,
-							_elm_lang$core$Native_List.fromArray(
-								[]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									A2(
-									_elm_lang$html$Html$input,
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html_Attributes$type$('checkbox'),
-											_elm_lang$html$Html_Attributes$checked(
-											A2(_elm_lang$core$List$member, _user$project$Main$ShowLocationDetails, entitlement.modifiers)),
-											_elm_lang$html$Html_Events$onClick(
-											A2(_user$project$Main$SetModifier, entitlement, _user$project$Main$ShowLocationDetails))
-										]),
-									_elm_lang$core$Native_List.fromArray(
-										[])),
-									_elm_lang$html$Html$text('disclose location')
-								])),
-							A2(
-							_elm_lang$html$Html$label,
-							_elm_lang$core$Native_List.fromArray(
-								[]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									A2(
-									_elm_lang$html$Html$input,
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html_Attributes$type$('checkbox'),
-											_elm_lang$html$Html_Attributes$checked(
-											A2(_elm_lang$core$List$member, _user$project$Main$ShowOwnerDetails, entitlement.modifiers)),
-											_elm_lang$html$Html_Events$onClick(
-											A2(_user$project$Main$SetModifier, entitlement, _user$project$Main$ShowOwnerDetails))
-										]),
-									_elm_lang$core$Native_List.fromArray(
-										[])),
-									_elm_lang$html$Html$text('disclose your details')
-								])),
-							A2(
 							_elm_lang$html$Html$fieldset,
 							_elm_lang$core$Native_List.fromArray(
 								[]),
 							_elm_lang$core$Native_List.fromArray(
 								[
 									A2(_user$project$Main$drawLocationView, entitlement, metadata.location)
-								])),
-							A2(
-							_elm_lang$html$Html$fieldset,
-							_elm_lang$core$Native_List.fromArray(
-								[]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									A2(_user$project$Main$drawOwnerView, entitlement, metadata.owner)
 								])),
 							A2(
 							_elm_lang$html$Html$fieldset,
@@ -9306,19 +9167,19 @@ var _user$project$Main$drawGroupSelector = function (entitlements) {
 					]),
 				A2(
 					_elm_lang$core$List$map,
-					function (_p15) {
-						var _p16 = _p15;
+					function (_p12) {
+						var _p13 = _p12;
 						return A2(
 							_elm_lang$html$Html$option,
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html_Attributes$value(
-									_elm_lang$core$Basics$toString(_p16._1))
+									_elm_lang$core$Basics$toString(_p13._1))
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html$text(
-									_elm_lang$core$Basics$toString(_p16._0))
+									_elm_lang$core$Basics$toString(_p13._0))
 								]));
 					},
 					_user$project$Main$allGroupsForDropdown))
@@ -9327,8 +9188,8 @@ var _user$project$Main$drawGroupSelector = function (entitlements) {
 var _user$project$Main$DisableEntitlements = {ctor: 'DisableEntitlements'};
 var _user$project$Main$EnableEntitlements = {ctor: 'EnableEntitlements'};
 var _user$project$Main$entitlementSelectorAction = function (b) {
-	var _p17 = b;
-	if (_p17 === false) {
+	var _p14 = b;
+	if (_p14 === false) {
 		return _user$project$Main$EnableEntitlements;
 	} else {
 		return _user$project$Main$DisableEntitlements;
@@ -9370,11 +9231,11 @@ var _user$project$Main$drawEntitlementSelector = function (selected) {
 			]));
 };
 var _user$project$Main$drawEntitlementEditor = function (model) {
-	var _p18 = model.currentEntitlement;
-	if (_p18.ctor === 'Nothing') {
+	var _p15 = model.currentEntitlement;
+	if (_p15.ctor === 'Nothing') {
 		return _user$project$Main$drawEntitlementSelector(false);
 	} else {
-		var _p19 = _p18._0;
+		var _p16 = _p15._0;
 		return A2(
 			_elm_lang$html$Html$div,
 			_elm_lang$core$Native_List.fromArray(
@@ -9391,8 +9252,8 @@ var _user$project$Main$drawEntitlementEditor = function (model) {
 						function (n) {
 							return A2(_user$project$Main$drawGroupEditor, n, model.metadata);
 						},
-						_p19)),
-					_user$project$Main$drawGroupSelector(_p19)
+						_p16)),
+					_user$project$Main$drawGroupSelector(_p16)
 				]));
 	}
 };
@@ -9403,14 +9264,6 @@ var _user$project$Main$view = function (model) {
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$html$Html$text(
-				_elm_lang$core$Basics$toString(model)),
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[])),
 				_user$project$Main$drawEntitlementEditor(model)
 			]));
 };
