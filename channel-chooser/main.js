@@ -9031,7 +9031,6 @@ var _user$project$Main$onSelect = function (msg) {
 		'change',
 		A2(_elm_lang$core$Json_Decode$map, msg, _user$project$Main$groupSelectorDecoder));
 };
-var _user$project$Main$ShowChannelDetails = {ctor: 'ShowChannelDetails'};
 var _user$project$Main$ShowOwnerDetails = {ctor: 'ShowOwnerDetails'};
 var _user$project$Main$drawOwnerView = F2(
 	function (entitlement, owner) {
@@ -9087,7 +9086,6 @@ var _user$project$Main$drawLocationView = F2(
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html$text('address : '),
 						_elm_lang$html$Html$text(location.address),
 						A2(
 						_elm_lang$html$Html$div,
@@ -9114,9 +9112,9 @@ var _user$project$Main$SetChannelVisiblity = F3(
 	function (a, b, c) {
 		return {ctor: 'SetChannelVisiblity', _0: a, _1: b, _2: c};
 	});
-var _user$project$Main$drawChannel = F3(
-	function (entitlement, channelEntitlement, showValues) {
-		var _p14 = showValues;
+var _user$project$Main$drawChannel = F2(
+	function (entitlement, channelEntitlement) {
+		var _p14 = channelEntitlement.visible;
 		if (_p14 === true) {
 			return A2(
 				_elm_lang$html$Html$div,
@@ -9148,12 +9146,23 @@ var _user$project$Main$drawChannel = F3(
 					[]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html$text(channelEntitlement.channel.id)
+						_elm_lang$html$Html$text(channelEntitlement.channel.id),
+						A2(
+						_elm_lang$html$Html$a,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$href('#'),
+								_elm_lang$html$Html_Events$onClick(
+								A3(_user$project$Main$SetChannelVisiblity, entitlement, channelEntitlement, true))
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('show')
+							]))
 					]));
 		}
 	});
 var _user$project$Main$drawChannelsView = function (ent) {
-	var showValues = A2(_elm_lang$core$List$member, _user$project$Main$ShowChannelDetails, ent.modifiers);
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -9161,7 +9170,7 @@ var _user$project$Main$drawChannelsView = function (ent) {
 		A2(
 			_elm_lang$core$List$map,
 			function (channel) {
-				return A3(_user$project$Main$drawChannel, ent, channel, showValues);
+				return A2(_user$project$Main$drawChannel, ent, channel);
 			},
 			ent.channels));
 };
@@ -9251,26 +9260,6 @@ var _user$project$Main$drawGroupEditor = F2(
 									_elm_lang$core$Native_List.fromArray(
 										[])),
 									_elm_lang$html$Html$text('disclose your details')
-								])),
-							A2(
-							_elm_lang$html$Html$label,
-							_elm_lang$core$Native_List.fromArray(
-								[]),
-							_elm_lang$core$Native_List.fromArray(
-								[
-									A2(
-									_elm_lang$html$Html$input,
-									_elm_lang$core$Native_List.fromArray(
-										[
-											_elm_lang$html$Html_Attributes$type$('checkbox'),
-											_elm_lang$html$Html_Attributes$checked(
-											A2(_elm_lang$core$List$member, _user$project$Main$ShowChannelDetails, entitlement.modifiers)),
-											_elm_lang$html$Html_Events$onClick(
-											A2(_user$project$Main$SetModifier, entitlement, _user$project$Main$ShowChannelDetails))
-										]),
-									_elm_lang$core$Native_List.fromArray(
-										[])),
-									_elm_lang$html$Html$text('view channel values')
 								])),
 							A2(
 							_elm_lang$html$Html$fieldset,

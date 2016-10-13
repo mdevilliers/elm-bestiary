@@ -123,8 +123,6 @@ type alias ChannelEntitlements =
 type Modifier
     = ShowLocationDetails
     | ShowOwnerDetails
-    | ShowChannelDetails
-
 
 type alias Entitlements =
     List Entitlement
@@ -373,10 +371,6 @@ drawGroupEditor entitlement metadata =
                 [ input [ type' "checkbox", checked (List.member ShowOwnerDetails entitlement.modifiers), onClick (SetModifier entitlement ShowOwnerDetails) ] []
                 , text "disclose your details"
                 ]
-            , label []
-                [ input [ type' "checkbox", checked (List.member ShowChannelDetails entitlement.modifiers), onClick (SetModifier entitlement ShowChannelDetails) ] []
-                , text "view channel values"
-                ]
             , fieldset [] [ drawLocationView entitlement metadata.location ]
             , fieldset [] [ drawOwnerView entitlement metadata.owner ]
             , fieldset [] [ drawChannelsView entitlement ]
@@ -419,8 +413,7 @@ drawLocationView entitlement location =
 
             True ->
                 div []
-                    [ text "address : "
-                    , text location.address
+                    [ text location.address
                     , div [] []
                     , text "latitude : "
                     , text (toString location.latitude)
@@ -432,16 +425,12 @@ drawLocationView entitlement location =
 
 drawChannelsView : Entitlement -> Html Msg
 drawChannelsView ent =
-    let
-        showValues =
-            List.member ShowChannelDetails ent.modifiers
-    in
-        div [] <| List.map (\channel -> drawChannel ent channel showValues) ent.channels
+        div [] <| List.map (\channel -> drawChannel ent channel) ent.channels
 
 
-drawChannel : Entitlement -> ChannelEntitlement -> Bool -> Html Msg
-drawChannel entitlement channelEntitlement showValues =
-    case showValues of
+drawChannel : Entitlement -> ChannelEntitlement -> Html Msg
+drawChannel entitlement channelEntitlement =
+    case channelEntitlement.visible of
         True ->
             div [] [ text channelEntitlement.channel.id, text " : "
                    , text (toString channelEntitlement.channel.value)
@@ -449,8 +438,9 @@ drawChannel entitlement channelEntitlement showValues =
                    ]
 
         False ->
-            div [] [ text channelEntitlement.channel.id ]
-
+            div [] [ text channelEntitlement.channel.id
+                     , a[ href "#", onClick (SetChannelVisiblity entitlement channelEntitlement True )] [text "show"]
+                   ]
 
 drawGroupSelector : Entitlements -> Html Msg
 drawGroupSelector entitlements =
