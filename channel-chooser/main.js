@@ -8704,47 +8704,25 @@ var _evancz$elm_http$Http$post = F3(
 			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request));
 	});
 
-var _user$project$Main$drawChannel = F2(
-	function (entitlement, channelEntitlement) {
-		return A2(
-			_elm_lang$html$Html$div,
+var _user$project$Main$accessibleStyle = function (accessible) {
+	var _p0 = accessible;
+	if (_p0 === true) {
+		return _elm_lang$html$Html_Attributes$style(
 			_elm_lang$core$Native_List.fromArray(
-				[]),
+				[]));
+	} else {
+		return _elm_lang$html$Html_Attributes$style(
 			_elm_lang$core$Native_List.fromArray(
 				[
-					_elm_lang$html$Html$text(channelEntitlement.channel.id),
-					_elm_lang$html$Html$text(' : '),
-					_elm_lang$html$Html$text(
-					_elm_lang$core$Basics$toString(channelEntitlement.channel.value)),
-					A2(
-					_elm_lang$html$Html$a,
-					_elm_lang$core$Native_List.fromArray(
-						[
-							_elm_lang$html$Html_Attributes$href('#')
-						]),
-					_elm_lang$core$Native_List.fromArray(
-						[
-							_elm_lang$html$Html$text('hide')
-						]))
+					{ctor: '_Tuple2', _0: 'text-decoration', _1: 'line-through'}
 				]));
-	});
-var _user$project$Main$drawChannelsView = function (ent) {
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		A2(
-			_elm_lang$core$List$map,
-			function (channel) {
-				return A2(_user$project$Main$drawChannel, ent, channel);
-			},
-			ent.channels));
+	}
 };
 var _user$project$Main$drawLocationView = F2(
 	function (entitlement, location) {
 		var showPrecise = entitlement.locationVisbile;
-		var _p0 = showPrecise;
-		if (_p0 === false) {
+		var _p1 = showPrecise;
+		if (_p1 === false) {
 			return A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -8797,32 +8775,32 @@ var _user$project$Main$sortEntitlements = function (e) {
 };
 var _user$project$Main$addEntitlement = F2(
 	function (entitlements, e) {
-		var _p1 = entitlements;
-		if (_p1.ctor === 'Nothing') {
+		var _p2 = entitlements;
+		if (_p2.ctor === 'Nothing') {
 			return _elm_lang$core$Maybe$Just(
 				_elm_lang$core$Native_List.fromArray(
 					[e]));
 		} else {
-			var _p3 = _p1._0;
-			var _p2 = A2(
+			var _p4 = _p2._0;
+			var _p3 = A2(
 				_elm_lang$core$List$any,
 				function (t) {
 					return _elm_lang$core$Native_Utils.eq(t.group, e.group);
 				},
-				_p3);
-			if (_p2 === true) {
+				_p4);
+			if (_p3 === true) {
 				return entitlements;
 			} else {
 				return _elm_lang$core$Maybe$Just(
 					_user$project$Main$sortEntitlements(
-						A2(_elm_lang$core$List_ops['::'], e, _p3)));
+						A2(_elm_lang$core$List_ops['::'], e, _p4)));
 			}
 		}
 	});
 var _user$project$Main$removeEntitlement = F2(
 	function (entitlements, group) {
-		var _p4 = entitlements;
-		if (_p4.ctor === 'Nothing') {
+		var _p5 = entitlements;
+		if (_p5.ctor === 'Nothing') {
 			return entitlements;
 		} else {
 			var x$ = A2(
@@ -8830,9 +8808,9 @@ var _user$project$Main$removeEntitlement = F2(
 				function (e) {
 					return !_elm_lang$core$Native_Utils.eq(e.group, group);
 				},
-				_p4._0);
-			var _p5 = x$;
-			if (_p5.ctor === '[]') {
+				_p5._0);
+			var _p6 = x$;
+			if (_p6.ctor === '[]') {
 				return _elm_lang$core$Maybe$Nothing;
 			} else {
 				return _elm_lang$core$Maybe$Just(x$);
@@ -8853,13 +8831,13 @@ var _user$project$Main$sortChannelEntitlements = function (channels) {
 };
 var _user$project$Main$replaceChannel = F2(
 	function (entitlement, channel) {
-		var _p6 = A2(
+		var _p7 = A2(
 			_elm_lang$core$List$filter,
 			function (c) {
 				return !_elm_lang$core$Native_Utils.eq(c.channel.id, channel.channel.id);
 			},
 			entitlement.channels);
-		if (_p6.ctor === '[]') {
+		if (_p7.ctor === '[]') {
 			return _elm_lang$core$Native_Utils.update(
 				entitlement,
 				{
@@ -8871,14 +8849,14 @@ var _user$project$Main$replaceChannel = F2(
 				entitlement,
 				{
 					channels: _user$project$Main$sortChannelEntitlements(
-						A2(_elm_lang$core$List_ops['::'], channel, _p6))
+						A2(_elm_lang$core$List_ops['::'], channel, _p7))
 				});
 		}
 	});
 var _user$project$Main$addOrRemove = F2(
 	function (l, m) {
-		var _p7 = A2(_elm_lang$core$List$member, m, l);
-		if (_p7 === true) {
+		var _p8 = A2(_elm_lang$core$List$member, m, l);
+		if (_p8 === true) {
 			return A2(
 				_elm_lang$core$List$filter,
 				function (x) {
@@ -8889,14 +8867,6 @@ var _user$project$Main$addOrRemove = F2(
 			return A2(_elm_lang$core$List_ops['::'], m, l);
 		}
 	});
-var _user$project$Main$flipVisibility = function (visible) {
-	var _p8 = visible;
-	if (_p8 === true) {
-		return false;
-	} else {
-		return true;
-	}
-};
 var _user$project$Main$channelData = '\n    {\n    \"owner\" : {\n        \"name\" : \"John Smith\",\n        \"email\" : \"john@smith.com\"\n    },\n    \"location\" : {\n        \"latitude\" : 1.23,\n        \"longitude\" : 3.45,\n        \"address\" : \"SW1 London GB\"\n    },\n    \"channels\": [\n    {\n        \"id\": \"bikes\",\n        \"value\": 15,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"bikes\"\n    },\n    {\n        \"id\": \"open_or_total_docks\",\n        \"value\": 16,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"bikes\"\n    },\n    {\n        \"id\": \"spaces\",\n        \"value\": 0,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"spaces\"\n    }]\n}\n';
 var _user$project$Main$Model = F2(
 	function (a, b) {
@@ -9045,7 +9015,7 @@ var _user$project$Main$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'SetLocationVisibility':
 				var entitlement$ = _elm_lang$core$Native_Utils.update(
 					_p10._0,
 					{locationVisbile: _p10._1});
@@ -9058,6 +9028,50 @@ var _user$project$Main$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			case 'MakeChannelAccessible':
+				var channelEntitlement = _elm_lang$core$Native_Utils.update(
+					_p10._1,
+					{accessible: _p10._2});
+				var entitlement$ = A2(_user$project$Main$replaceChannel, _p10._0, channelEntitlement);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							currentEntitlement: A2(_user$project$Main$replaceEntitlement, model.currentEntitlement, entitlement$)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				if (_p10._2 === false) {
+					var channelEntitlement = _elm_lang$core$Native_Utils.update(
+						_p10._1,
+						{accessible: false, discoverable: false});
+					var entitlement$ = A2(_user$project$Main$replaceChannel, _p10._0, channelEntitlement);
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								currentEntitlement: A2(_user$project$Main$replaceEntitlement, model.currentEntitlement, entitlement$)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					var channelEntitlement = _elm_lang$core$Native_Utils.update(
+						_p10._1,
+						{discoverable: true});
+					var entitlement$ = A2(_user$project$Main$replaceChannel, _p10._0, channelEntitlement);
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								currentEntitlement: A2(_user$project$Main$replaceEntitlement, model.currentEntitlement, entitlement$)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
 		}
 	});
 var _user$project$Main$allGroupsForDropdown = _elm_lang$core$Native_List.fromArray(
@@ -9099,6 +9113,115 @@ var _user$project$Main$onSelect = function (msg) {
 		_elm_lang$html$Html_Events$on,
 		'change',
 		A2(_elm_lang$core$Json_Decode$map, msg, _user$project$Main$groupSelectorDecoder));
+};
+var _user$project$Main$MakeChannelDiscoverable = F3(
+	function (a, b, c) {
+		return {ctor: 'MakeChannelDiscoverable', _0: a, _1: b, _2: c};
+	});
+var _user$project$Main$MakeChannelAccessible = F3(
+	function (a, b, c) {
+		return {ctor: 'MakeChannelAccessible', _0: a, _1: b, _2: c};
+	});
+var _user$project$Main$drawChannel = F2(
+	function (entitlement, channelEntitlement) {
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(
+					_elm_lang$html$Html$span,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_user$project$Main$accessibleStyle(channelEntitlement.discoverable)
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text(channelEntitlement.channel.id),
+							_elm_lang$html$Html$text(' : ')
+						])),
+					A2(
+					_elm_lang$html$Html$span,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$hidden(
+							_elm_lang$core$Basics$not(channelEntitlement.accessible))
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text(
+							_elm_lang$core$Basics$toString(channelEntitlement.channel.value))
+						])),
+					A2(
+					_elm_lang$html$Html$label,
+					_elm_lang$core$Native_List.fromArray(
+						[]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_elm_lang$html$Html$input,
+							_elm_lang$core$Native_List.fromArray(
+								[
+									_elm_lang$html$Html_Attributes$type$('checkbox'),
+									_elm_lang$html$Html_Attributes$checked(channelEntitlement.discoverable),
+									_elm_lang$html$Html_Events$onClick(
+									A3(
+										_user$project$Main$MakeChannelDiscoverable,
+										entitlement,
+										channelEntitlement,
+										_elm_lang$core$Basics$not(channelEntitlement.discoverable)))
+								]),
+							_elm_lang$core$Native_List.fromArray(
+								[])),
+							_elm_lang$html$Html$text('is discoverable')
+						])),
+					A2(
+					_elm_lang$html$Html$span,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$hidden(
+							_elm_lang$core$Basics$not(channelEntitlement.discoverable))
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_elm_lang$html$Html$label,
+							_elm_lang$core$Native_List.fromArray(
+								[]),
+							_elm_lang$core$Native_List.fromArray(
+								[
+									A2(
+									_elm_lang$html$Html$input,
+									_elm_lang$core$Native_List.fromArray(
+										[
+											_elm_lang$html$Html_Attributes$type$('checkbox'),
+											_elm_lang$html$Html_Attributes$checked(channelEntitlement.accessible),
+											_elm_lang$html$Html_Events$onClick(
+											A3(
+												_user$project$Main$MakeChannelAccessible,
+												entitlement,
+												channelEntitlement,
+												_elm_lang$core$Basics$not(channelEntitlement.accessible)))
+										]),
+									_elm_lang$core$Native_List.fromArray(
+										[])),
+									_elm_lang$html$Html$text('is accessible')
+								]))
+						]))
+				]));
+	});
+var _user$project$Main$drawChannelsView = function (entitlement) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(
+			_elm_lang$core$List$map,
+			function (channel) {
+				return A2(_user$project$Main$drawChannel, entitlement, channel);
+			},
+			entitlement.channels));
 };
 var _user$project$Main$SetLocationVisibility = F2(
 	function (a, b) {
@@ -9163,7 +9286,7 @@ var _user$project$Main$drawGroupEditor = F2(
 											A2(
 												_user$project$Main$SetLocationVisibility,
 												entitlement,
-												_user$project$Main$flipVisibility(entitlement.locationVisbile)))
+												_elm_lang$core$Basics$not(entitlement.locationVisbile)))
 										]),
 									_elm_lang$core$Native_List.fromArray(
 										[])),

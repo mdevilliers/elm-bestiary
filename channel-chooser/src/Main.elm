@@ -120,8 +120,10 @@ type alias ChannelEntitlement =
 type alias ChannelEntitlements =
     List ChannelEntitlement
 
+
 type alias Entitlements =
     List Entitlement
+
 
 type alias Entitlement =
     { group : Group
@@ -129,11 +131,13 @@ type alias Entitlement =
     , locationVisbile : Visible
     }
 
+
 type alias Location =
     { longitude : Float
     , latitude : Float
     , address : String
     }
+
 
 type alias Owner =
     { name : String
@@ -141,7 +145,9 @@ type alias Owner =
     }
 
 
+
 -- UPDATE
+
 
 type Msg
     = NoOp
@@ -151,7 +157,10 @@ type Msg
     | DisableEntitlements
     | AddEntitlement Group
     | RemoveEntitlement Group
-    | SetLocationVisibility Entitlement Visible
+    | SetLocationVisibility Entitlement Bool
+    | MakeChannelAccessible Entitlement ChannelEntitlement Bool
+    | MakeChannelDiscoverable Entitlement ChannelEntitlement Bool
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -183,9 +192,40 @@ update msg model =
 
             SetLocationVisibility entitlement visible ->
                 let
-                    entitlement' = {entitlement | locationVisbile = visible}
+                    entitlement' =
+                        { entitlement | locationVisbile = visible }
                 in
-                ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement')} , Cmd.none)
+                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement') }, Cmd.none )
+
+            MakeChannelAccessible entitlement channel accessible ->
+                let
+                    channelEntitlement =
+                        { channel | accessible = accessible }
+
+                    entitlement' =
+                        replaceChannel entitlement channelEntitlement
+                in
+                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement') }, Cmd.none )
+
+            MakeChannelDiscoverable entitlement channel False ->
+                let
+                    channelEntitlement =
+                        { channel | accessible = False, discoverable = False }
+
+                    entitlement' =
+                        replaceChannel entitlement channelEntitlement
+                in
+                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement') }, Cmd.none )
+
+            MakeChannelDiscoverable entitlement channel True ->
+                let
+                    channelEntitlement =
+                        { channel | discoverable = True }
+
+                    entitlement' =
+                        replaceChannel entitlement channelEntitlement
+                in
+                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement') }, Cmd.none )
 
 
 newEntitlement : Group -> Metadata -> Entitlement
@@ -197,39 +237,25 @@ newEntitlement g metadata =
         (Entitlement g (sortChannelEntitlements channelEntitlements) False)
 
 
-flipVisibility : Visible -> Visible
-flipVisibility visible =
-    case visible of
-        True ->
-            False
-
-        False ->
-            True
-
-
-addOrRemove : List a -> a -> List a
-addOrRemove l m =
-    case List.member m l of
-        True ->
-            List.filter (\x -> x /= m) l
-
-        False ->
-            m :: l
-
-
 replaceChannel : Entitlement -> ChannelEntitlement -> Entitlement
 replaceChannel entitlement channel =
-       case List.filter (\c -> c.channel.id /= channel.channel.id ) entitlement.channels of
-           [] ->  {entitlement | channels = [channel]}
-           x ->   {entitlement | channels =  sortChannelEntitlements ( channel :: x ) }
+    case List.filter (\c -> c.channel.id /= channel.channel.id) entitlement.channels of
+        [] ->
+            { entitlement | channels = [ channel ] }
 
-sortChannelEntitlements : ChannelEntitlements -> ChannelEntitlements 
+        x ->
+            { entitlement | channels = sortChannelEntitlements (channel :: x) }
+
+
+sortChannelEntitlements : ChannelEntitlements -> ChannelEntitlements
 sortChannelEntitlements channels =
-        List.sortWith channelEntitlementSorter channels
+    List.sortWith channelEntitlementSorter channels
+
 
 channelEntitlementSorter : ChannelEntitlement -> ChannelEntitlement -> Order
 channelEntitlementSorter a b =
     compare a.channel.id b.channel.id
+
 
 removeEntitlement : Maybe Entitlements -> Group -> Maybe Entitlements
 removeEntitlement entitlements group =
@@ -300,9 +326,9 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [-- text (toString model)
-        --, div [] []
-         drawEntitlementEditor model
+        [ -- text (toString model)
+          --, div [] []
+          drawEntitlementEditor model
         ]
 
 
@@ -351,7 +377,7 @@ drawGroupEditor entitlement metadata =
             , a [ href "#", onClick (RemoveEntitlement entitlement.group) ] [ text "remove" ]
             , div [] []
             , label []
-                [ input [ type' "checkbox", checked entitlement.locationVisbile , onClick (SetLocationVisibility entitlement ( flipVisibility entitlement.locationVisbile )) ] []
+                [ input [ type' "checkbox", checked entitlement.locationVisbile, onClick (SetLocationVisibility entitlement (not entitlement.locationVisbile)) ] []
                 , text "disclose location"
                 ]
             , fieldset [] [ drawLocationView entitlement metadata.location ]
@@ -364,7 +390,8 @@ drawGroupEditor entitlement metadata =
 drawLocationView : Entitlement -> Location -> Html Msg
 drawLocationView entitlement location =
     let
-        showPrecise = entitlement.locationVisbile
+        showPrecise =
+            entitlement.locationVisbile
     in
         case showPrecise of
             False ->
@@ -385,23 +412,37 @@ drawLocationView entitlement location =
 
 
 drawChannelsView : Entitlement -> Html Msg
-drawChannelsView ent =
-        div [] <| List.map (\channel -> drawChannel ent channel) ent.channels
+drawChannelsView entitlement =
+    div [] <| List.map (\channel -> drawChannel entitlement channel) entitlement.channels
 
 
 drawChannel : Entitlement -> ChannelEntitlement -> Html Msg
 drawChannel entitlement channelEntitlement =
-    --case channelEntitlement.visible of
-    --    True ->
-            div [] [ text channelEntitlement.channel.id, text " : "
-                   , text (toString channelEntitlement.channel.value)
-                   , a[ href "#"] [text "hide"]
-                   ]
+    div []
+        [ span [ accessibleStyle channelEntitlement.discoverable ] [ text channelEntitlement.channel.id, text " : " ]
+        , span [ hidden (not channelEntitlement.accessible) ] [ text (toString channelEntitlement.channel.value) ]
+        , label []
+            [ input [ type' "checkbox", checked channelEntitlement.discoverable, onClick (MakeChannelDiscoverable entitlement channelEntitlement (not channelEntitlement.discoverable)) ] []
+            , text "is discoverable"
+            ]
+        , span [ hidden (not channelEntitlement.discoverable) ]
+            [ label []
+                [ input [ type' "checkbox", checked channelEntitlement.accessible, onClick (MakeChannelAccessible entitlement channelEntitlement (not channelEntitlement.accessible)) ] []
+                , text "is accessible"
+                ]
+            ]
+        ]
 
-    --    False ->
-    --        div [] [ text channelEntitlement.channel.id
-    --                 , a[ href "#"] [text "show"]
-    --               ]
+
+accessibleStyle : Bool -> Attribute msg
+accessibleStyle accessible =
+    case accessible of
+        True ->
+            style []
+
+        False ->
+            style [ ( "text-decoration", "line-through" ) ]
+
 
 drawGroupSelector : Entitlements -> Html Msg
 drawGroupSelector entitlements =
