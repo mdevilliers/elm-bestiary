@@ -8853,20 +8853,6 @@ var _user$project$Main$replaceChannel = F2(
 				});
 		}
 	});
-var _user$project$Main$addOrRemove = F2(
-	function (l, m) {
-		var _p8 = A2(_elm_lang$core$List$member, m, l);
-		if (_p8 === true) {
-			return A2(
-				_elm_lang$core$List$filter,
-				function (x) {
-					return !_elm_lang$core$Native_Utils.eq(x, m);
-				},
-				l);
-		} else {
-			return A2(_elm_lang$core$List_ops['::'], m, l);
-		}
-	});
 var _user$project$Main$channelData = '\n    {\n    \"owner\" : {\n        \"name\" : \"John Smith\",\n        \"email\" : \"john@smith.com\"\n    },\n    \"location\" : {\n        \"latitude\" : 1.23,\n        \"longitude\" : 3.45,\n        \"address\" : \"SW1 London GB\"\n    },\n    \"channels\": [\n    {\n        \"id\": \"bikes\",\n        \"value\": 15,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"bikes\"\n    },\n    {\n        \"id\": \"open_or_total_docks\",\n        \"value\": 16,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"bikes\"\n    },\n    {\n        \"id\": \"spaces\",\n        \"value\": 0,\n        \"recorded_at\": \"2016-10-11T09:46:01Z\",\n        \"units\": \"spaces\"\n    }]\n}\n';
 var _user$project$Main$Model = F2(
 	function (a, b) {
@@ -8953,12 +8939,12 @@ var _user$project$Main$EmergencyServices = {ctor: 'EmergencyServices'};
 var _user$project$Main$GeneralPublic = {ctor: 'GeneralPublic'};
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p9 = A2(
+		var _p8 = A2(
 			_elm_lang$core$Debug$log,
 			'update :',
 			_elm_lang$core$Basics$toString(msg));
-		var _p10 = msg;
-		switch (_p10.ctor) {
+		var _p9 = msg;
+		switch (_p9.ctor) {
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'LoadingFailed':
@@ -8968,7 +8954,7 @@ var _user$project$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{metadata: _p10._0}),
+						{metadata: _p9._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'EnableEntitlements':
@@ -9001,7 +8987,7 @@ var _user$project$Main$update = F2(
 							currentEntitlement: A2(
 								_user$project$Main$addEntitlement,
 								model.currentEntitlement,
-								A2(_user$project$Main$newEntitlement, _p10._0, model.metadata))
+								A2(_user$project$Main$newEntitlement, _p9._0, model.metadata))
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -9011,14 +8997,14 @@ var _user$project$Main$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							currentEntitlement: A2(_user$project$Main$removeEntitlement, model.currentEntitlement, _p10._0)
+							currentEntitlement: A2(_user$project$Main$removeEntitlement, model.currentEntitlement, _p9._0)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'SetLocationVisibility':
 				var entitlement$ = _elm_lang$core$Native_Utils.update(
-					_p10._0,
-					{locationVisbile: _p10._1});
+					_p9._0,
+					{locationVisbile: _p9._1});
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -9030,9 +9016,9 @@ var _user$project$Main$update = F2(
 				};
 			case 'MakeChannelAccessible':
 				var channelEntitlement = _elm_lang$core$Native_Utils.update(
-					_p10._1,
-					{accessible: _p10._2});
-				var entitlement$ = A2(_user$project$Main$replaceChannel, _p10._0, channelEntitlement);
+					_p9._1,
+					{accessible: _p9._2});
+				var entitlement$ = A2(_user$project$Main$replaceChannel, _p9._0, channelEntitlement);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -9043,11 +9029,11 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
-				if (_p10._2 === false) {
+				if (_p9._2 === false) {
 					var channelEntitlement = _elm_lang$core$Native_Utils.update(
-						_p10._1,
+						_p9._1,
 						{accessible: false, discoverable: false});
-					var entitlement$ = A2(_user$project$Main$replaceChannel, _p10._0, channelEntitlement);
+					var entitlement$ = A2(_user$project$Main$replaceChannel, _p9._0, channelEntitlement);
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -9059,9 +9045,9 @@ var _user$project$Main$update = F2(
 					};
 				} else {
 					var channelEntitlement = _elm_lang$core$Native_Utils.update(
-						_p10._1,
+						_p9._1,
 						{discoverable: true});
-					var entitlement$ = A2(_user$project$Main$replaceChannel, _p10._0, channelEntitlement);
+					var entitlement$ = A2(_user$project$Main$replaceChannel, _p9._0, channelEntitlement);
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -9092,12 +9078,12 @@ var _user$project$Main$groupInfo = function (tag) {
 					tag);
 			},
 			_user$project$Main$allGroupsForDropdown));
-	var _p11 = filtered;
-	if (_p11.ctor === 'Nothing') {
+	var _p10 = filtered;
+	if (_p10.ctor === 'Nothing') {
 		return _elm_lang$core$Json_Decode$fail('!');
 	} else {
 		return _elm_lang$core$Json_Decode$succeed(
-			_elm_lang$core$Basics$fst(_p11._0));
+			_elm_lang$core$Basics$fst(_p10._0));
 	}
 };
 var _user$project$Main$groupSelectorDecoder = A2(
@@ -9329,19 +9315,19 @@ var _user$project$Main$drawGroupSelector = function (entitlements) {
 					]),
 				A2(
 					_elm_lang$core$List$map,
-					function (_p12) {
-						var _p13 = _p12;
+					function (_p11) {
+						var _p12 = _p11;
 						return A2(
 							_elm_lang$html$Html$option,
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html_Attributes$value(
-									_elm_lang$core$Basics$toString(_p13._1))
+									_elm_lang$core$Basics$toString(_p12._1))
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html$text(
-									_elm_lang$core$Basics$toString(_p13._0))
+									_elm_lang$core$Basics$toString(_p12._0))
 								]));
 					},
 					_user$project$Main$allGroupsForDropdown))
@@ -9350,8 +9336,8 @@ var _user$project$Main$drawGroupSelector = function (entitlements) {
 var _user$project$Main$DisableEntitlements = {ctor: 'DisableEntitlements'};
 var _user$project$Main$EnableEntitlements = {ctor: 'EnableEntitlements'};
 var _user$project$Main$entitlementSelectorAction = function (b) {
-	var _p14 = b;
-	if (_p14 === false) {
+	var _p13 = b;
+	if (_p13 === false) {
 		return _user$project$Main$EnableEntitlements;
 	} else {
 		return _user$project$Main$DisableEntitlements;
@@ -9393,11 +9379,11 @@ var _user$project$Main$drawEntitlementSelector = function (selected) {
 			]));
 };
 var _user$project$Main$drawEntitlementEditor = function (model) {
-	var _p15 = model.currentEntitlement;
-	if (_p15.ctor === 'Nothing') {
+	var _p14 = model.currentEntitlement;
+	if (_p14.ctor === 'Nothing') {
 		return _user$project$Main$drawEntitlementSelector(false);
 	} else {
-		var _p16 = _p15._0;
+		var _p15 = _p14._0;
 		return A2(
 			_elm_lang$html$Html$div,
 			_elm_lang$core$Native_List.fromArray(
@@ -9414,8 +9400,8 @@ var _user$project$Main$drawEntitlementEditor = function (model) {
 						function (n) {
 							return A2(_user$project$Main$drawGroupEditor, n, model.metadata);
 						},
-						_p16)),
-					_user$project$Main$drawGroupSelector(_p16)
+						_p15)),
+					_user$project$Main$drawGroupSelector(_p15)
 				]));
 	}
 };
