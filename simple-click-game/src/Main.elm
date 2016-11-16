@@ -1,14 +1,13 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Random
 import List.Extra exposing (andThen, zip, groupsOf)
 
 
-main : Program Never
+main : Program Never Model Msg
 main =
     Html.program
         { init = init
@@ -96,7 +95,7 @@ newBoard : Int -> Game
 newBoard size =
     let
         all =
-            [0..(size - 1)] `andThen` \x -> [0..(size - 1)] `andThen` \y -> [ ( x, y ) ]
+            List.range 0 (size - 1) |> andThen (\x -> List.range 0 (size - 1) |> andThen (\y -> [ ( x, y ) ]))
 
         -- TODO : need to set seed
         seed =
