@@ -1,7 +1,6 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.App as Html
 import Http
 import Json.Decode exposing (..)
 import Json.Encode exposing (..)
@@ -11,7 +10,7 @@ import Html.Events exposing (onClick, on)
 import Dict
 
 
-main : Program Never
+main : Program Never Model Msg
 main =
     Html.program
         { init = init
@@ -192,40 +191,40 @@ update msg model =
 
             SetLocationVisibility entitlement visible ->
                 let
-                    entitlement' =
+                    entitlement_ =
                         { entitlement | locationVisbile = visible }
                 in
-                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement') }, Cmd.none )
+                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement_) }, Cmd.none )
 
             MakeChannelAccessible entitlement channel accessible ->
                 let
                     channelEntitlement =
                         { channel | accessible = accessible }
 
-                    entitlement' =
+                    entitlement_ =
                         replaceChannel entitlement channelEntitlement
                 in
-                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement') }, Cmd.none )
+                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement_) }, Cmd.none )
 
             MakeChannelDiscoverable entitlement channel False ->
                 let
                     channelEntitlement =
                         { channel | accessible = False, discoverable = False }
 
-                    entitlement' =
+                    entitlement_ =
                         replaceChannel entitlement channelEntitlement
                 in
-                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement') }, Cmd.none )
+                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement_) }, Cmd.none )
 
             MakeChannelDiscoverable entitlement channel True ->
                 let
                     channelEntitlement =
                         { channel | discoverable = True }
 
-                    entitlement' =
+                    entitlement_ =
                         replaceChannel entitlement channelEntitlement
                 in
-                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement') }, Cmd.none )
+                    ( { model | currentEntitlement = (replaceEntitlement model.currentEntitlement entitlement_) }, Cmd.none )
 
 
 newEntitlement : Group -> Metadata -> Entitlement
@@ -265,15 +264,15 @@ removeEntitlement entitlements group =
 
         Just x ->
             let
-                x' =
+                x_ =
                     List.filter (\e -> e.group /= group) x
             in
-                case x' of
+                case x_ of
                     [] ->
                         Nothing
 
                     other ->
-                        Just (x')
+                        Just (x_)
 
 
 addEntitlement : Maybe Entitlements -> Entitlement -> Maybe Entitlements
@@ -294,10 +293,10 @@ addEntitlement entitlements e =
 replaceEntitlement : Maybe Entitlements -> Entitlement -> Maybe Entitlements
 replaceEntitlement entitlements e =
     let
-        entitlements' =
+        entitlements_ =
             removeEntitlement entitlements e.group
     in
-        addEntitlement entitlements' e
+        addEntitlement entitlements_ e
 
 
 sortEntitlements : Entitlements -> Entitlements
@@ -351,7 +350,7 @@ drawEntitlementSelector selected =
     div []
         [ fieldset []
             [ label []
-                [ input [ type' "checkbox", checked selected, onClick (entitlementSelectorAction selected) ] []
+                [ input [ type_ "checkbox", checked selected, onClick (entitlementSelectorAction selected) ] []
                 , text "Entitlements"
                 ]
             ]
@@ -377,7 +376,7 @@ drawGroupEditor entitlement metadata =
             , a [ href "#", onClick (RemoveEntitlement entitlement.group) ] [ text "remove" ]
             , div [] []
             , label []
-                [ input [ type' "checkbox", checked entitlement.locationVisbile, onClick (SetLocationVisibility entitlement (not entitlement.locationVisbile)) ] []
+                [ input [ type_ "checkbox", checked entitlement.locationVisbile, onClick (SetLocationVisibility entitlement (not entitlement.locationVisbile)) ] []
                 , text "disclose location"
                 ]
             , fieldset [] [ drawLocationView entitlement metadata.location ]
@@ -422,12 +421,12 @@ drawChannel entitlement channelEntitlement =
         [ span [ accessibleStyle channelEntitlement.discoverable ] [ text channelEntitlement.channel.id, text " : " ]
         , span [ hidden (not channelEntitlement.accessible) ] [ text (toString channelEntitlement.channel.value) ]
         , label []
-            [ input [ type' "checkbox", checked channelEntitlement.discoverable, onClick (MakeChannelDiscoverable entitlement channelEntitlement (not channelEntitlement.discoverable)) ] []
+            [ input [ type_ "checkbox", checked channelEntitlement.discoverable, onClick (MakeChannelDiscoverable entitlement channelEntitlement (not channelEntitlement.discoverable)) ] []
             , text "is discoverable"
             ]
         , span [ hidden (not channelEntitlement.discoverable) ]
             [ label []
-                [ input [ type' "checkbox", checked channelEntitlement.accessible, onClick (MakeChannelAccessible entitlement channelEntitlement (not channelEntitlement.accessible)) ] []
+                [ input [ type_ "checkbox", checked channelEntitlement.accessible, onClick (MakeChannelAccessible entitlement channelEntitlement (not channelEntitlement.accessible)) ] []
                 , text "is accessible"
                 ]
             ]
@@ -453,7 +452,7 @@ drawGroupSelector entitlements =
 
 groupSelectorDecoder : Json.Decode.Decoder Group
 groupSelectorDecoder =
-    Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int `Json.Decode.andThen` groupInfo
+    Json.Decode.at [ "target", "selectedIndex" ] Json.Decode.int |> Json.Decode.andThen groupInfo
 
 
 groupInfo : Int -> Json.Decode.Decoder Group
@@ -461,7 +460,7 @@ groupInfo tag =
     let
         filtered =
             allGroupsForDropdown
-                |> List.filter (\x -> snd (x) == tag)
+                |> List.filter (\x -> Tuple.second (x) == tag)
                 |> List.head
     in
         case filtered of
@@ -469,7 +468,7 @@ groupInfo tag =
                 Json.Decode.fail "!"
 
             Just x ->
-                Json.Decode.succeed (fst x)
+                Json.Decode.succeed (Tuple.first x)
 
 
 onSelect : (Group -> msg) -> Html.Attribute msg
@@ -491,31 +490,31 @@ loadChannels =
 
 metadataDecoder : Json.Decode.Decoder Metadata
 metadataDecoder =
-    Json.Decode.object3 Metadata
-        ("channels" := Json.Decode.list channelDecoder)
-        ("location" := locationDecoder)
-        ("owner" := ownerDecoder)
+    Json.Decode.map3 Metadata
+        (Json.Decode.field "channels" Json.Decode.list channelDecoder)
+        (Json.Decode.field "location" locationDecoder)
+        (Json.Decode.field "owner" ownerDecoder)
 
 
 locationDecoder : Json.Decode.Decoder Location
 locationDecoder =
-    Json.Decode.object3 Location
-        ("longitude" := Json.Decode.float)
-        ("latitude" := Json.Decode.float)
-        ("address" := Json.Decode.string)
+    Json.Decode.map3 Location
+        (Json.Decode.field "longitude" Json.Decode.float)
+        (Json.Decode.field "latitude" Json.Decode.float)
+        (Json.Decode.field "address" Json.Decode.string)
 
 
 channelDecoder : Json.Decode.Decoder Channel
 channelDecoder =
-    Json.Decode.object4 Channel
-        ("id" := Json.Decode.string)
-        ("value" := Json.Decode.int)
-        ("recorded_at" := Json.Decode.string)
-        ("units" := Json.Decode.string)
+    Json.Decode.map4 Channel
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "value" Json.Decode.int)
+        (Json.Decode.field "recorded_at" Json.Decode.string)
+        (Json.Decode.field "units" Json.Decode.string)
 
 
 ownerDecoder : Json.Decode.Decoder Owner
 ownerDecoder =
-    Json.Decode.object2 Owner
-        ("email" := Json.Decode.string)
-        ("name" := Json.Decode.string)
+    Json.Decode.map2 Owner
+        (Json.Decode.field "email" Json.Decode.string)
+        (Json.Decode.field "name" Json.Decode.string)
