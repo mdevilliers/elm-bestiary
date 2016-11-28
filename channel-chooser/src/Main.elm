@@ -39,8 +39,7 @@ initialModel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, loadChannels )
-
+    ( initialModel, Task.perform (\_ ->loadChannels ) (Task.succeed NoOp))
 
 channelData : String
 channelData =
@@ -481,17 +480,19 @@ allGroupsForDropdown =
     [ ( GeneralPublic, 0 ), ( EmergencyServices, 1 ), ( Academic, 2 ), ( Commercial, 3 ), ( NonProfit, 4 ) ]
 
 
-loadChannels : Cmd Msg
-loadChannels =
-    Json.Decode.decodeString metadataDecoder channelData
-        |> Task.fromResult
-        |> Task.perform LoadingFailed LoadingSuccess
+loadChannels : Msg
+    processLoad (Json.Decode.decodeString metadataDecoder channelData)
 
+processLoad : Result String Metadata -> Msg
+processLoad result =
+    case result of
+        Result.Ok m -> LoadingSuccess m
+        Result.Err error -> LoadingFailed error
 
 metadataDecoder : Json.Decode.Decoder Metadata
 metadataDecoder =
     Json.Decode.map3 Metadata
-        (Json.Decode.field "channels" Json.Decode.list channelDecoder)
+        (Json.Decode.field "channels" (Json.Decode.list channelDecoder))
         (Json.Decode.field "location" locationDecoder)
         (Json.Decode.field "owner" ownerDecoder)
 
