@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (text)
+import Dict exposing (..)
 
 
 --Following
@@ -18,6 +19,7 @@ data =
 
 
 
+--    "R8, R4, R4, R8"
 --    "R2, L3"
 --    "R2, R2, R2"
 --    "R5, L5, R5, R3"
@@ -39,11 +41,12 @@ type alias Position =
     { x : Int
     , y : Int
     , direction : Direction
+    , previous : Dict.Dict String Bool
     }
 
 
 main =
-    map data (Position 0 0 North)
+    map data (Position 0 0 North Dict.empty)
         |> toString
         |> text
 
@@ -117,15 +120,31 @@ parseTurn s =
 
 apply : Direction -> Int -> Position -> Position
 apply direction steps old =
-    case direction of
-        North ->
-            Position (old.x + steps) old.y direction
+    let
+        key =
+            (toString old.x) ++ "," ++ (toString old.y)
 
-        South ->
-            Position (old.x - steps) old.y direction
+        exists =
+            Dict.member key old.previous
 
-        East ->
-            Position old.x (old.y + steps) direction
+        all =
+            Dict.insert key True old.previous
 
-        West ->
-            Position old.x (old.y - steps) direction
+        _ =
+            Debug.log key exists
+    in
+        if steps == 0 then
+            old
+        else
+            case direction of
+                North ->
+                    apply direction (steps - 1) (Position (old.x + 1) old.y direction all)
+
+                South ->
+                    apply direction (steps - 1) (Position (old.x - 1) old.y direction all)
+
+                East ->
+                    apply direction (steps - 1) (Position old.x (old.y + 1) direction all)
+
+                West ->
+                    apply direction (steps - 1) (Position old.x (old.y - 1) direction all)
