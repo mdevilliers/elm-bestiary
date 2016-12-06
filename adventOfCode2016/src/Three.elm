@@ -4,12 +4,7 @@ import Html exposing (text)
 
 
 main =
-    String.split "\n" data
-        |> List.map (\s -> String.words s)
-        |> List.map (\s -> toIntArray s)
-        |> List.map (\x -> potentialTriangle x)
-        |> List.filter (\x -> x)
-        |> List.length
+    [ partone, parttwo ]
         |> toString
         |> text
 
@@ -27,6 +22,40 @@ potentialTriangle ints =
 toIntArray : List String -> List Int
 toIntArray strs =
     List.map (\x -> Result.withDefault 0 (String.toInt x)) strs
+
+
+load =
+    String.split "\n" data
+        |> List.map (\s -> String.words s)
+        |> List.map (\s -> toIntArray s)
+
+
+process a =
+    List.map (\x -> potentialTriangle x) a
+        |> List.filter (\x -> x)
+        |> List.length
+
+
+partone =
+    load
+        |> process
+
+
+parttwo =
+    load
+        |> List.concat
+        |> transform
+        |> process
+
+
+transform : List a -> List (List a)
+transform list =
+    case list of
+        a1 :: b1 :: c1 :: a2 :: b2 :: c2 :: a3 :: b3 :: c3 :: xs ->
+            [ [ a1, a2, a3 ], [ b1, b2, b3 ], [ c1, c2, c3 ] ] ++ (transform xs)
+
+        _ ->
+            []
 
 
 data : String
