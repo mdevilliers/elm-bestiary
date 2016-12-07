@@ -6,7 +6,7 @@ import Char exposing (..)
 
 
 main =
-    [ partone ]
+    [ parttwo ]
         |> toString
         |> text
 
@@ -28,6 +28,8 @@ partone =
 
 parttwo =
     load
+        |> List.map parseLine
+        |> List.map (\l -> Debug.log (rotateLine l.input l.sectorID) l.sectorID)
 
 
 load =
@@ -38,6 +40,7 @@ type alias Line =
     { sectorID : Int
     , checksum : String
     , bits : String
+    , input : String
     }
 
 
@@ -50,13 +53,16 @@ parseLine str =
         checksum =
             String.right 10 str
 
+        content =
+            String.left (length - 10) str
+
         bits =
-            parseBits (String.left (length - 10) str)
+            parseBits content
 
         sectorID =
             stringToSectorID checksum
     in
-        Line sectorID checksum bits
+        Line sectorID checksum bits content
 
 
 stringToSectorID : String -> Int
@@ -106,6 +112,113 @@ groupBy str =
         )
         Dict.empty
         str
+
+
+rotateLine : String -> Int -> String
+rotateLine str count =
+    String.map (\c -> rotate count c) str
+
+
+rotate : Int -> Char -> Char
+rotate count c =
+    case count of
+        0 ->
+            c
+
+        _ ->
+            incrementChar c
+                |> rotate (count - 1)
+
+
+incrementChar : Char -> Char
+incrementChar c =
+    case Char.toUpper c of
+        'A' ->
+            'B'
+
+        'B' ->
+            'C'
+
+        'C' ->
+            'D'
+
+        'D' ->
+            'E'
+
+        'E' ->
+            'F'
+
+        'F' ->
+            'G'
+
+        'G' ->
+            'H'
+
+        'H' ->
+            'I'
+
+        'I' ->
+            'J'
+
+        'J' ->
+            'K'
+
+        'K' ->
+            'L'
+
+        'L' ->
+            'M'
+
+        'M' ->
+            'N'
+
+        'N' ->
+            'O'
+
+        'O' ->
+            'P'
+
+        'P' ->
+            'Q'
+
+        'Q' ->
+            'R'
+
+        'R' ->
+            'S'
+
+        'S' ->
+            'T'
+
+        'T' ->
+            'U'
+
+        'U' ->
+            'V'
+
+        'V' ->
+            'W'
+
+        'W' ->
+            'X'
+
+        'X' ->
+            'Y'
+
+        'Y' ->
+            'Z'
+
+        'Z' ->
+            'A'
+
+        '_' ->
+            ' '
+
+        ' ' ->
+            ' '
+
+        _ ->
+            'A'
 
 
 data : String
